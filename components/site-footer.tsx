@@ -18,9 +18,9 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="bg-foreground text-background py-4">
+    <footer className="bg-foreground text-background py-4 border-0">
       <div className="w-full pr-4 pl-0 md:pl-4 lg:pl-8">
-        <div className="flex flex-col lg:flex-row gap-6 mb-3">
+        <div className="flex flex-col lg:flex-row gap-6 mb-3 border-0">
           {/* Company Info */}
           <div className="flex-1 lg:max-w-[40%]">
             <div className="flex items-start gap-3">
@@ -166,7 +166,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="pt-3 text-center">
+        <div className="pt-3 text-center border-t-0">
           <p className="text-sm text-background/60">
             © {new Date().getFullYear()} Delo Truck Center LLC. All rights reserved.
           </p>

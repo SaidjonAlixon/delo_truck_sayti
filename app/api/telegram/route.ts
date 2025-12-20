@@ -113,8 +113,18 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok || !data.ok) {
       console.error('Telegram API error:', data)
+      const errorMessage = data.description || 'Failed to send message to Telegram'
+      
+      // More user-friendly error messages
+      if (errorMessage.includes('chat not found') || errorMessage.includes('Bad Request')) {
+        return NextResponse.json(
+          { success: false, message: 'Kanal topilmadi. Iltimos, bot kanalda admin ekanligini va kanal ID ni to\'g\'ri ekanligini tekshiring.' },
+          { status: 500 }
+        )
+      }
+      
       return NextResponse.json(
-        { success: false, message: 'Failed to send message to Telegram' },
+        { success: false, message: `Telegram xatosi: ${errorMessage}` },
         { status: 500 }
       )
     }
