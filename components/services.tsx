@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Circle, Droplet, Gauge, SettingsIcon, ClipboardCheck } from "lucide-react"
+import { Search, Circle, Droplet, Gauge, SettingsIcon, ClipboardCheck, Truck, Wind, Disc, CheckCircle, FileCheck, FlaskConical, Sparkles, Battery } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/language-context"
@@ -15,6 +15,14 @@ const iconMap: { [key: string]: any } = {
   suspension: Gauge,
   transmission: SettingsIcon,
   dot: ClipboardCheck,
+  roadside: Truck,
+  ac: Wind,
+  brake: Disc,
+  pm: CheckCircle,
+  carb: FileCheck,
+  def: FlaskConical,
+  dpf: Sparkles,
+  jumpstart: Battery,
 }
 
 const defaultServices = [
@@ -22,8 +30,8 @@ const defaultServices = [
       icon: Search,
       titleKey: "computerDiagnostics" as const,
       descKey: "computerDiagnosticsDesc" as const,
-      price: "$150",
-      priceType: "starting" as const,
+      price: null,
+      priceType: "call" as const,
       serviceId: "diagnostics",
       image: "/services/diagnostics.jpg",
     },
@@ -31,8 +39,8 @@ const defaultServices = [
       icon: Circle,
       titleKey: "tireService" as const,
       descKey: "tireServiceDesc" as const,
-      price: "$80",
-      priceType: "starting" as const,
+      price: null,
+      priceType: "call" as const,
       serviceId: "tire",
       image: "/services/tire-service.jpg",
     },
@@ -40,8 +48,8 @@ const defaultServices = [
       icon: Droplet,
       titleKey: "oilChange" as const,
       descKey: "oilChangeDesc" as const,
-      price: "$200",
-      priceType: "starting" as const,
+      price: null,
+      priceType: "call" as const,
       serviceId: "oil",
       image: "/services/oil-change.jpg",
     },
@@ -67,10 +75,82 @@ const defaultServices = [
       icon: ClipboardCheck,
       titleKey: "dotCarbInspections" as const,
       descKey: "dotCarbInspectionsDesc" as const,
-      price: "$100",
-      priceType: "fixed" as const,
+      price: null,
+      priceType: "call" as const,
       serviceId: "dot",
       image: "/services/dot-inspection.jpg",
+    },
+    {
+      icon: Truck,
+      titleKey: "roadsideService" as const,
+      descKey: "roadsideServiceDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "roadside",
+      image: "/services/tire-service.jpg",
+    },
+    {
+      icon: Wind,
+      titleKey: "acService" as const,
+      descKey: "acServiceDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "ac",
+      image: "/services/diagnostics.jpg",
+    },
+    {
+      icon: Disc,
+      titleKey: "brakeService" as const,
+      descKey: "brakeServiceDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "brake",
+      image: "/services/dot-inspection.jpg",
+    },
+    {
+      icon: CheckCircle,
+      titleKey: "pmService" as const,
+      descKey: "pmServiceDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "pm",
+      image: "/services/oil-change.jpg",
+    },
+    {
+      icon: FileCheck,
+      titleKey: "carbInspection" as const,
+      descKey: "carbInspectionDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "carb",
+      image: "/services/dot-inspection.jpg",
+    },
+    {
+      icon: FlaskConical,
+      titleKey: "defService" as const,
+      descKey: "defServiceDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "def",
+      image: "/services/oil-change.jpg",
+    },
+    {
+      icon: Sparkles,
+      titleKey: "dpfCleaning" as const,
+      descKey: "dpfCleaningDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "dpf",
+      image: "/services/diagnostics.jpg",
+    },
+    {
+      icon: Battery,
+      titleKey: "jumpStarts" as const,
+      descKey: "jumpStartsDesc" as const,
+      price: null,
+      priceType: "call" as const,
+      serviceId: "jumpstart",
+      image: "/services/tire-service.jpg",
     },
   ]
 
@@ -124,8 +204,8 @@ export function Services() {
   }
 
   return (
-    <section id="services" className="py-20 bg-muted/30">
-      <div className="container mx-auto px-4">
+    <section id="services" className="py-20 bg-muted/30 w-full">
+      <div className="container mx-auto px-4 w-full max-w-7xl">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
             <span className="text-sm font-semibold text-primary">{getTranslation(language, "ourServices")}</span>
@@ -136,7 +216,7 @@ export function Services() {
           <p className="text-lg text-foreground leading-relaxed">{getTranslation(language, "servicesDescription")}</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
           {services.map((service, index) => {
             const Icon = service.icon
             return (

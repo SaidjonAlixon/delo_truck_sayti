@@ -48,6 +48,22 @@ export const translations = {
     transmissionRepairDesc: "Diesel Exhaust Fluid system service and complete transmission repair and maintenance",
     dotCarbInspections: "DOT Inspection",
     dotCarbInspectionsDesc: "Comprehensive Department of Transportation safety inspections for commercial vehicles",
+    roadsideService: "Roadside Service",
+    roadsideServiceDesc: "24/7 emergency roadside assistance including towing, tire changes, fuel delivery, and lockout services",
+    acService: "A/C Service",
+    acServiceDesc: "Complete air conditioning system service, repair, and maintenance for commercial truck cabs",
+    brakeService: "Brake Service",
+    brakeServiceDesc: "Professional brake inspection, repair, and replacement services for all truck types",
+    pmService: "PM Service",
+    pmServiceDesc: "Preventive maintenance services to keep your truck running smoothly and avoid costly breakdowns",
+    carbInspection: "CARB Inspection",
+    carbInspectionDesc: "California Air Resources Board emissions inspections and compliance services",
+    defService: "DEF Service",
+    defServiceDesc: "Diesel Exhaust Fluid system service, maintenance, and repair for emissions compliance",
+    dpfCleaning: "DPF Cleaning",
+    dpfCleaningDesc: "Diesel Particulate Filter cleaning and regeneration services to maintain engine performance",
+    jumpStarts: "Jump Starts",
+    jumpStartsDesc: "Emergency jump start services to get your truck running when the battery dies",
     startingAt: "Starting at",
     callForPrice: "Call for price",
     getAQuote: "Get a Quote",
@@ -166,6 +182,30 @@ export const translations = {
     dotCarbInspections: "DOT Tekshiruvi",
     dotCarbInspectionsDesc:
       "Tijorat transport vositalari uchun Transport Departamentining to'liq xavfsizlik tekshiruvlari",
+    roadsideService: "Yo'l Yonida Xizmat",
+    roadsideServiceDesc:
+      "24/7 favqulodda yo'l yonida yordam, shu jumladan tashish, shina almashtirish, yoqilg'i yetkazib berish va qulflash xizmatlari",
+    acService: "Konditsioner Xizmati",
+    acServiceDesc:
+      "Tijorat yuk mashinasi kabinalari uchun to'liq konditsioner tizimi xizmati, ta'mirlash va texnik xizmat ko'rsatish",
+    brakeService: "Tormoz Xizmati",
+    brakeServiceDesc:
+      "Barcha yuk mashinasi turlari uchun professional tormoz tekshiruvi, ta'mirlash va almashtirish xizmatlari",
+    pmService: "PM Xizmati",
+    pmServiceDesc:
+      "Yuk mashinangizni muammosiz ishlashini ta'minlash va qimmat buzilishlarni oldini olish uchun profilaktika texnik xizmat ko'rsatish",
+    carbInspection: "CARB Tekshiruvi",
+    carbInspectionDesc:
+      "California Air Resources Board emissiya tekshiruvlari va muvofiqlik xizmatlari",
+    defService: "DEF Xizmati",
+    defServiceDesc:
+      "Emissiya muvofiqlik uchun dizel egzoz suyuqligi tizimi xizmati, texnik xizmat ko'rsatish va ta'mirlash",
+    dpfCleaning: "DPF Tozalash",
+    dpfCleaningDesc:
+      "Dvigatel ishlashini saqlab qolish uchun dizel zarrachalar filtri tozalash va regeneratsiya xizmatlari",
+    jumpStarts: "Akkumulyator Yuritish",
+    jumpStartsDesc:
+      "Akkumulyator to'xtaganda yuk mashinangizni ishga tushirish uchun favqulodda yuritish xizmatlari",
     startingAt: "Dan boshlab",
     callForPrice: "Narx uchun qo'ng'iroq qiling",
     getAQuote: "Taklif oling",

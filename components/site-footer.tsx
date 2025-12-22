@@ -24,13 +24,6 @@ export function SiteFooter() {
           {/* Company Info */}
           <div className="flex-1 lg:max-w-[40%]">
             <div className="flex items-start gap-3">
-              <div className="w-32 h-32 md:w-36 md:h-36 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img 
-                  src="/services/logo_delo.png" 
-                  alt="Delo Truck Center Logo" 
-                  className="w-full h-full object-contain"
-                />
-              </div>
               <div className="flex-1">
                 <h3 className="font-bold text-2xl text-background leading-tight mb-1">Delo Truck Center</h3>
                 <p className="text-base text-background/70 mb-2">LLC</p>

@@ -9,6 +9,7 @@ import { Testimonials } from "@/components/testimonials"
 import { Map } from "@/components/map"
 import { Footer } from "@/components/footer"
 import { SiteFooter } from "@/components/site-footer"
+import { Snow } from "@/components/snow"
 import { LanguageProvider } from "@/lib/language-context"
 import { ThemeProvider } from "@/lib/theme-context"
 
@@ -17,6 +18,7 @@ export default function Home() {
     <ThemeProvider>
       <LanguageProvider>
         <main className="min-h-screen">
+          <Snow />
           <Header />
           <Hero />
           <Footer />
