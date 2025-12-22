@@ -161,36 +161,33 @@ export function Services() {
   const [services, setServices] = useState(defaultServices)
 
   useEffect(() => {
-    // Load services from localStorage
-    const saved = localStorage.getItem("adminServices")
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        // Map icon names to actual icon components
-        const mapped = parsed.map((s: any) => ({
-          ...s,
-          icon: iconMap[s.serviceId] || Search,
-        }))
-        setServices(mapped)
-      } catch (e) {
-        console.error("Error loading services:", e)
-      }
-    }
+    // Always use defaultServices to ensure all services are displayed
+    setServices(defaultServices)
 
-    // Listen for updates
+    // Listen for updates from admin panel (if needed)
     const handleUpdate = () => {
       const saved = localStorage.getItem("adminServices")
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          const mapped = parsed.map((s: any) => ({
+          // Merge with defaultServices to ensure all services are included
+          const defaultIds = new Set(defaultServices.map(s => s.serviceId))
+          const savedServices = parsed.map((s: any) => ({
             ...s,
             icon: iconMap[s.serviceId] || Search,
           }))
-          setServices(mapped)
+          // Combine: use saved services if they exist, otherwise use defaults
+          const combined = defaultServices.map(defaultService => {
+            const saved = savedServices.find((s: any) => s.serviceId === defaultService.serviceId)
+            return saved || defaultService
+          })
+          setServices(combined)
         } catch (e) {
           console.error("Error loading services:", e)
+          setServices(defaultServices)
         }
+      } else {
+        setServices(defaultServices)
       }
     }
 
