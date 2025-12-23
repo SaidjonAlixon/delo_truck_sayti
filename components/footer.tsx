@@ -3,9 +3,11 @@
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
+import { useContent } from "@/lib/use-content"
 
 export function Footer() {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
 
   return (
     <footer className="bg-foreground text-background py-12">
@@ -17,7 +19,7 @@ export function Footer() {
               <Phone className="w-6 h-6 text-background" />
             </div>
             <div>
-              <p className="text-sm text-background/70 mb-1">{getTranslation(language, "phone")}</p>
+              <p className="text-sm text-background/70 mb-1">{getContent("phone")}</p>
               <p className="text-lg font-bold text-background">+1 929-522-9913</p>
             </div>
           </div>
@@ -39,7 +41,7 @@ export function Footer() {
               <MapPin className="w-6 h-6 text-background" />
             </div>
             <div>
-              <p className="text-sm text-background/70 mb-1">{getTranslation(language, "address")}</p>
+              <p className="text-sm text-background/70 mb-1">{getContent("address")}</p>
               <p className="text-lg font-bold text-background">636 N Irwin St,</p>
               <p className="text-lg font-bold text-background">Dayton, OH 45403</p>
             </div>
@@ -51,7 +53,7 @@ export function Footer() {
               <Mail className="w-6 h-6 text-background" />
             </div>
             <div>
-              <p className="text-sm text-background/70 mb-1">{getTranslation(language, "email")}</p>
+              <p className="text-sm text-background/70 mb-1">{getContent("email")}</p>
               <p className="text-lg font-bold text-background">delotruckcenter@gmail.com</p>
             </div>
           </div>

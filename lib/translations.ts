@@ -130,6 +130,68 @@ export const translations = {
     showLess: "Show Less",
 }
 
+// Client-side cache for database content
+let dbTranslations: Record<string, string> | null = null
+let dbCacheTime = 0
+const DB_CACHE_DURATION = 30000 // 30 seconds
+
+// Load translations from database (client-side only)
+async function loadDbTranslations(): Promise<Record<string, string>> {
+  if (typeof window === 'undefined') {
+    return translations
+  }
+
+  const now = Date.now()
+  if (dbTranslations && (now - dbCacheTime) < DB_CACHE_DURATION) {
+    return dbTranslations
+  }
+
+  try {
+    const response = await fetch('/api/content', {
+      cache: 'no-store',
+    })
+    const result = await response.json()
+    
+    if (result.success && result.data.length > 0) {
+      const contentMap: Record<string, string> = { ...translations }
+      result.data.forEach((item: any) => {
+        contentMap[item.content_key] = item.content_value
+      })
+      dbTranslations = contentMap
+      dbCacheTime = now
+      return contentMap
+    }
+  } catch (error) {
+    console.error('Error loading translations from database:', error)
+  }
+
+  return translations
+}
+
+// Initialize on client side
+if (typeof window !== 'undefined') {
+  loadDbTranslations().then(() => {
+    // Listen for content updates
+    window.addEventListener('contentUpdated', () => {
+      dbTranslations = null
+      loadDbTranslations()
+    })
+  })
+}
+
 export function getTranslation(_lang: Language, key: keyof typeof translations): string {
-  return translations[key]
+  // If we have cached database translations, use them
+  if (dbTranslations && dbTranslations[key]) {
+    return dbTranslations[key]
+  }
+  
+  // Fallback to static translations
+  return translations[key] || key
+}
+
+// Helper function to refresh translations
+export function refreshTranslations() {
+  dbTranslations = null
+  dbCacheTime = 0
+  loadDbTranslations()
 }

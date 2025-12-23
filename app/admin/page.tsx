@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Trash2, Edit, LogOut, Settings } from "lucide-react"
+import { Plus, Trash2, Edit, LogOut } from "lucide-react"
 
 interface Service {
   id: string
@@ -92,11 +92,10 @@ export default function AdminPanel() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="services">Xizmatlar</TabsTrigger>
             <TabsTrigger value="testimonials">Izohlar</TabsTrigger>
             <TabsTrigger value="content">Kontent</TabsTrigger>
-            <TabsTrigger value="settings">Sozlamalar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services">
@@ -109,10 +108,6 @@ export default function AdminPanel() {
 
           <TabsContent value="content">
             <ContentManagement />
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <SettingsManagement />
           </TabsContent>
         </Tabs>
       </div>
@@ -533,15 +528,20 @@ function TestimonialsManagement() {
 
   const loadTestimonials = async () => {
     try {
-      const response = await fetch('/api/testimonials')
+      const response = await fetch('/api/testimonials', {
+        cache: 'no-store',
+      })
       const result = await response.json()
       if (result.success) {
-        setTestimonials(result.data)
+        setTestimonials(result.data || [])
+        console.log('Loaded testimonials:', result.data?.length || 0)
       } else {
-        console.error('Failed to load testimonials')
+        console.error('Failed to load testimonials:', result.message)
+        alert('Izohlarni yuklashda xatolik: ' + (result.message || 'Noma\'lum xatolik'))
       }
     } catch (error) {
       console.error('Error loading testimonials:', error)
+      alert('Izohlarni yuklashda xatolik yuz berdi. Iltimos, saytni yangilang.')
     }
   }
 
@@ -560,8 +560,11 @@ function TestimonialsManagement() {
         const result = await response.json()
         if (result.success) {
           loadTestimonials()
+          // Dispatch event to update frontend
+          window.dispatchEvent(new Event("testimonialsUpdated"))
+          alert('Izoh muvaffaqiyatli o\'chirildi! Saytni yangilang (F5)')
         } else {
-          alert('Error deleting testimonial')
+          alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
         }
       } catch (error) {
         console.error('Error deleting testimonial:', error)
@@ -573,8 +576,13 @@ function TestimonialsManagement() {
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Izohlar Boshqaruvi</h2>
-        <Button onClick={() => setIsAdding(true)}>
+        <div>
+          <h2 className="text-2xl font-bold">Izohlar Boshqaruvi</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Jami izohlar: {testimonials.length}
+          </p>
+        </div>
+        <Button onClick={() => setIsAdding(true)} className="bg-primary hover:bg-primary/90">
           <Plus className="w-4 h-4 mr-2" />
           Yangi Izoh
         </Button>
@@ -594,7 +602,7 @@ function TestimonialsManagement() {
                     id: editingId,
                     name: testimonial.name,
                     role: testimonial.role,
-                    text: testimonial.textEn || testimonial.text,
+                    text: testimonial.text,
                     rating: testimonial.rating,
                   }),
                 })
@@ -602,6 +610,11 @@ function TestimonialsManagement() {
                 if (result.success) {
                   loadTestimonials()
                   setEditingId(null)
+                  // Dispatch event to update frontend
+                  window.dispatchEvent(new Event("testimonialsUpdated"))
+                  alert('Izoh muvaffaqiyatli yangilandi! Saytni yangilang (F5)')
+                } else {
+                  alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
                 }
               } else {
                 // Create new testimonial
@@ -611,7 +624,7 @@ function TestimonialsManagement() {
                   body: JSON.stringify({
                     name: testimonial.name,
                     role: testimonial.role,
-                    text: testimonial.textEn || testimonial.text,
+                    text: testimonial.text,
                     rating: testimonial.rating,
                   }),
                 })
@@ -619,6 +632,11 @@ function TestimonialsManagement() {
                 if (result.success) {
                   loadTestimonials()
                   setIsAdding(false)
+                  // Dispatch event to update frontend
+                  window.dispatchEvent(new Event("testimonialsUpdated"))
+                  alert('Yangi izoh muvaffaqiyatli qo\'shildi! Saytni yangilang (F5)')
+                } else {
+                  alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
                 }
               }
             } catch (error) {
@@ -633,27 +651,71 @@ function TestimonialsManagement() {
         />
       )}
 
-      <div className="space-y-4">
-        {testimonials.map((testimonial) => (
-          <div key={testimonial.id} className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex-1">
-              <h3 className="font-semibold">{testimonial.name}</h3>
-              <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                {testimonial.text || testimonial.textEn}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setEditingId(testimonial.id)}>
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(testimonial.id)}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {testimonials.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <p className="text-lg mb-2">Hozircha izohlar yo'q</p>
+          <p className="text-sm">Yangi izoh qo'shish uchun "Yangi Izoh" tugmasini bosing</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {testimonials.map((testimonial) => (
+            <Card key={testimonial.id} className="p-5 border-2 hover:border-primary/50 transition-colors">
+              <div className="flex flex-col h-full">
+                <div className="flex-1 mb-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg mb-1 text-foreground">{testimonial.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{testimonial.role}</p>
+                      <div className="flex items-center gap-1 mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <span
+                            key={i}
+                            className={`text-lg ${
+                              i < (testimonial.rating || 5)
+                                ? 'text-yellow-400'
+                                : 'text-gray-300'
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                        <span className="text-xs text-muted-foreground ml-1">
+                          ({testimonial.rating}/5)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-muted/50 p-3 rounded-lg mb-3">
+                    <p className="text-sm text-foreground leading-relaxed line-clamp-4">
+                      {testimonial.text || "Izoh yo'q"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-3 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingId(testimonial.id)}
+                    className="flex-1"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Tahrirlash
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(testimonial.id)}
+                    className="flex-1"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    O'chirish
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </Card>
   )
 }
@@ -697,8 +759,8 @@ function TestimonialForm({ onSave, onCancel, initialData }: any) {
           <textarea
             value={formData.text}
             onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            rows={4}
+            className="w-full px-4 py-2 border rounded-lg bg-background text-foreground min-h-[100px]"
+            rows={5}
             placeholder="Enter testimonial text in English"
             required
           />
@@ -717,30 +779,231 @@ function TestimonialForm({ onSave, onCancel, initialData }: any) {
             <option value={5}>5 yulduz</option>
           </select>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => onSave(formData)}>Saqlash</Button>
-          <Button variant="outline" onClick={onCancel}>Bekor qilish</Button>
+        <div className="flex gap-2 pt-2">
+          <Button onClick={() => onSave(formData)} className="bg-primary hover:bg-primary/90">
+            Saqlash
+          </Button>
+          <Button variant="outline" onClick={onCancel}>
+            Bekor qilish
+          </Button>
         </div>
       </div>
     </Card>
   )
 }
 
+interface ContentItem {
+  id: number
+  page: string
+  content_key: string
+  content_value: string
+}
+
 function ContentManagement() {
+  const [contents, setContents] = useState<ContentItem[]>([])
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [selectedPage, setSelectedPage] = useState<string>('all')
+  const [loading, setLoading] = useState(true)
+
+  const pages = ['all', 'hero', 'services', 'about', 'contact', 'testimonials', 'footer', 'map', 'general']
+
+  useEffect(() => {
+    loadContents()
+  }, [])
+
+  const loadContents = async () => {
+    try {
+      setLoading(true)
+      const url = selectedPage === 'all' ? '/api/content' : `/api/content?page=${selectedPage}`
+      const response = await fetch(url)
+      const result = await response.json()
+      if (result.success) {
+        setContents(result.data)
+      } else {
+        console.error('Failed to load contents')
+      }
+    } catch (error) {
+      console.error('Error loading contents:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadContents()
+  }, [selectedPage])
+
+  const handleSave = async (id: number, newValue: string) => {
+    try {
+      const response = await fetch('/api/content', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          content_value: newValue,
+        }),
+      })
+      const result = await response.json()
+      if (result.success) {
+        await loadContents()
+        setEditingId(null)
+        // Dispatch event to update frontend
+        window.dispatchEvent(new Event('contentUpdated'))
+        alert('Kontent muvaffaqiyatli yangilandi! Saytni yangilang (F5)')
+      } else {
+        alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+      }
+    } catch (error) {
+      console.error('Error saving content:', error)
+      alert('Kontentni saqlashda xatolik yuz berdi')
+    }
+  }
+
+  const handleDelete = async (id: number, contentKey: string) => {
+    if (!confirm(`"${contentKey}" kontentini o'chirishni xohlaysizmi?`)) {
+      return
+    }
+    try {
+      const response = await fetch(`/api/content?id=${id}`, {
+        method: 'DELETE',
+      })
+      const result = await response.json()
+      if (result.success) {
+        await loadContents()
+        // Dispatch event to update frontend
+        window.dispatchEvent(new Event('contentUpdated'))
+        alert('Kontent muvaffaqiyatli o\'chirildi! Saytni yangilang (F5)')
+      } else {
+        alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+      }
+    } catch (error) {
+      console.error('Error deleting content:', error)
+      alert('Kontentni o\'chirishda xatolik yuz berdi')
+    }
+  }
+
+  const groupedContents = contents.reduce((acc, content) => {
+    if (!acc[content.page]) {
+      acc[content.page] = []
+    }
+    acc[content.page].push(content)
+    return acc
+  }, {} as Record<string, ContentItem[]>)
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Kontent Boshqaruvi</h2>
+        <p className="text-muted-foreground">Yuklanmoqda...</p>
+      </Card>
+    )
+  }
+
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Kontent Boshqaruvi</h2>
-      <p className="text-muted-foreground">Bu bo'limda sahifa kontentlarini boshqarish funksiyalari bo'ladi.</p>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Kontent Boshqaruvi</h2>
+        <div className="flex gap-2">
+          <select
+            value={selectedPage}
+            onChange={(e) => setSelectedPage(e.target.value)}
+            className="px-4 py-2 border rounded-lg bg-background text-foreground"
+          >
+            {pages.map(page => (
+              <option key={page} value={page}>
+                {page === 'all' ? 'Barcha sahifalar' : page.charAt(0).toUpperCase() + page.slice(1)}
+              </option>
+            ))}
+          </select>
+          <Button onClick={loadContents} variant="outline">
+            Yangilash
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        {Object.entries(groupedContents).map(([page, pageContents]) => (
+          <div key={page} className="border rounded-lg p-4">
+            <h3 className="text-xl font-semibold mb-4 capitalize">
+              {page === 'all' ? 'Barcha' : page} sahifasi ({pageContents.length} ta matn)
+            </h3>
+            <div className="space-y-3">
+              {pageContents.map((content) => (
+                <div key={content.id} className="flex gap-3 items-start p-3 border rounded-lg bg-muted/30">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                      {content.content_key}
+                    </label>
+                    {editingId === content.id ? (
+                      <div className="space-y-2">
+                        <textarea
+                          value={content.content_value}
+                          onChange={(e) => {
+                            setContents(prev =>
+                              prev.map(c => c.id === content.id ? { ...c, content_value: e.target.value } : c)
+                            )
+                          }}
+                          className="w-full px-3 py-2 border rounded-lg bg-background text-foreground min-h-[80px]"
+                          rows={3}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleSave(content.id, content.content_value)}
+                          >
+                            Saqlash
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingId(null)
+                              loadContents() // Reset to original
+                            }}
+                          >
+                            Bekor qilish
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm text-foreground whitespace-pre-wrap break-words">
+                          {content.content_value || '(bo\'sh)'}
+                        </p>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingId(content.id)}
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Tahrirlash
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(content.id, content.content_key)}
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            O'chirish
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        {contents.length === 0 && (
+          <p className="text-muted-foreground text-center py-8">
+            Kontent topilmadi. Database'ni yangilash uchun /api/init-db endpoint'ni chaqiring.
+          </p>
+        )}
+      </div>
     </Card>
   )
 }
 
-function SettingsManagement() {
-  return (
-    <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Sozlamalar</h2>
-      <p className="text-muted-foreground">Bu bo'limda umumiy sozlamalarni boshqarish funksiyalari bo'ladi.</p>
-    </Card>
-  )
-}
 

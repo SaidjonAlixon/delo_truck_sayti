@@ -7,12 +7,14 @@ import { useTheme } from "@/lib/theme-context"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
 import { QuoteModal } from "@/components/quote-modal"
+import { useContent } from "@/lib/use-content"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -45,13 +47,13 @@ export function Header() {
               onClick={() => scrollToSection("services")}
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
-              {getTranslation(language, "services")}
+              {getContent("services")}
             </button>
             <button
               onClick={() => scrollToSection("about")}
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
-              {getTranslation(language, "about")}
+              {getContent("about")}
             </button>
 
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
@@ -64,7 +66,7 @@ export function Header() {
               onClick={() => setIsQuoteModalOpen(true)}
             >
               <Phone className="w-4 h-4 mr-2" />
-              {getTranslation(language, "callNow")}
+              {getContent("callNow")}
             </Button>
           </nav>
 
@@ -80,13 +82,13 @@ export function Header() {
                 onClick={() => scrollToSection("services")}
                 className="text-left text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
-                {getTranslation(language, "services")}
+                {getContent("services")}
               </button>
               <button
                 onClick={() => scrollToSection("about")}
                 className="text-left text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
-                {getTranslation(language, "about")}
+                {getContent("about")}
               </button>
 
               <Button variant="outline" size="sm" onClick={toggleTheme}>
@@ -102,7 +104,7 @@ export function Header() {
                 }}
               >
                 <Phone className="w-4 h-4 mr-2" />
-                {getTranslation(language, "callNow")}
+                {getContent("callNow")}
               </Button>
             </div>
           </nav>

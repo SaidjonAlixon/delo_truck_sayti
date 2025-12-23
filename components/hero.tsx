@@ -6,6 +6,7 @@ import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { QuoteModal } from "@/components/quote-modal"
+import { useContent } from "@/lib/use-content"
 
 interface HeroSlide {
   title: string
@@ -15,28 +16,29 @@ interface HeroSlide {
 
 export function Hero() {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
 
   const slides: HeroSlide[] = useMemo(
     () => [
       {
-        title: getTranslation(language, "heroSlide1Title"),
-        description: getTranslation(language, "heroSlide1Description"),
+        title: getContent("heroSlide1Title"),
+        description: getContent("heroSlide1Description"),
         backgroundImage: "/professional-commercial-truck-in-modern-service-ce.jpg",
       },
       {
-        title: getTranslation(language, "heroSlide2Title"),
-        description: getTranslation(language, "heroSlide2Description"),
+        title: getContent("heroSlide2Title"),
+        description: getContent("heroSlide2Description"),
         backgroundImage: "/professional-truck-mechanics-working-in-modern-ser.jpg",
       },
       {
-        title: getTranslation(language, "heroSlide3Title"),
-        description: getTranslation(language, "heroSlide3Description"),
+        title: getContent("heroSlide3Title"),
+        description: getContent("heroSlide3Description"),
         backgroundImage: "/professional-commercial-truck-in-modern-service-ce.jpg",
       },
     ],
-    [language]
+    [getContent]
   )
 
   const nextSlide = useCallback(() => {
@@ -102,7 +104,7 @@ export function Hero() {
                   className="bg-red-600 hover:bg-red-700 text-white text-lg h-14 px-8 uppercase font-semibold"
                   onClick={() => setIsQuoteModalOpen(true)}
                 >
-                  {getTranslation(language, "contactUsToday")}
+                  {getContent("contactUsToday")}
                 </Button>
               </div>
             </div>

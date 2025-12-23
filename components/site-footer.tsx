@@ -3,10 +3,12 @@
 import { Phone, Mail, MapPin, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
+import { useContent } from "@/lib/use-content"
 import { useState } from "react"
 
 export function SiteFooter() {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
   // Barcha bo'limlarni doimiy ochiq qilib qo'yamiz
   const [hoveredSection] = useState<string | null>("all")
 
@@ -28,8 +30,8 @@ export function SiteFooter() {
                 <h3 className="font-bold text-2xl text-background leading-tight mb-1">Delo Truck Center</h3>
                 <p className="text-base text-background/70 mb-2">LLC</p>
                 <div className="text-sm text-background/80 leading-relaxed space-y-0">
-                  <p>{getTranslation(language, "footerDescription1")}</p>
-                  <p>{getTranslation(language, "footerDescription2")}</p>
+                  <p>{getContent("footerDescription1")}</p>
+                  <p>{getContent("footerDescription2")}</p>
                 </div>
               </div>
             </div>
@@ -49,7 +51,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("services")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "computerDiagnostics")}
+                    {getContent("computerDiagnostics")}
                   </button>
                 </li>
                 <li>
@@ -57,7 +59,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("services")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "tireService")}
+                    {getContent("tireService")}
                   </button>
                 </li>
                 <li>
@@ -65,7 +67,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("services")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "oilChange")}
+                    {getContent("oilChange")}
                   </button>
                 </li>
                 <li>
@@ -73,7 +75,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("services")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "suspensionSteering")}
+                    {getContent("suspensionSteering")}
                   </button>
                 </li>
                 <li>
@@ -81,7 +83,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("services")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "transmissionRepair")}
+                    {getContent("transmissionRepair")}
                   </button>
                 </li>
                 <li>
@@ -89,7 +91,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("services")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "dotCarbInspections")}
+                    {getContent("dotCarbInspections")}
                   </button>
                 </li>
               </ul>
@@ -107,7 +109,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("services")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "services")}
+                    {getContent("services")}
                   </button>
                 </li>
                 <li>
@@ -115,7 +117,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("about")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "about")}
+                    {getContent("about")}
                   </button>
                 </li>
                 <li>
@@ -123,7 +125,7 @@ export function SiteFooter() {
                     onClick={() => scrollToSection("contact")}
                     className="hover:text-primary transition-colors text-left"
                   >
-                    {getTranslation(language, "contact")}
+                    {getContent("contact")}
                   </button>
                 </li>
               </ul>

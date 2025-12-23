@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
 import { sendQuoteToTelegram } from "@/lib/telegram-api"
+import { useContent } from "@/lib/use-content"
 
 interface QuoteModalProps {
   isOpen: boolean
@@ -17,6 +18,7 @@ interface QuoteModalProps {
 
 export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps) {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
@@ -43,7 +45,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
       
       setSubmitStatus({
         type: 'success',
-        message: getTranslation(language, "thankYouMessage")
+        message: getContent("thankYouMessage")
       })
       
       // Reset form
@@ -75,13 +77,13 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
       >
         <div className="p-6 md:p-8">
           <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">
-            {getTranslation(language, "requestAQuote")}
+            {getContent("requestAQuote")}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
-                {getTranslation(language, "fullName")} *
+                {getContent("fullName")} *
               </label>
               <input
                 type="text"
@@ -95,7 +97,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
-                {getTranslation(language, "phoneNumber")} *
+                {getContent("phoneNumber")} *
               </label>
               <input
                 type="tel"
@@ -109,14 +111,14 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
-                {getTranslation(language, "serviceType")}
+                {getContent("serviceType")}
               </label>
               <select
                 value={formData.serviceType}
                 onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">{getTranslation(language, "selectService")}</option>
+                <option value="">{getContent("selectService")}</option>
                 <option value="roadside">Roadside Service</option>
                 <option value="in-shop">In Shop Service</option>
                 <option value="parking">Parking</option>
@@ -125,12 +127,12 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
-                {getTranslation(language, "additionalNotes")}
+                {getContent("additionalNotes")}
               </label>
               <textarea
                 value={formData.additionalNotes}
                 onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                placeholder={getTranslation(language, "additionalNotesPlaceholder")}
+                placeholder={getContent("additionalNotesPlaceholder")}
                 rows={4}
                 className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
@@ -153,7 +155,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
               className="w-full bg-destructive hover:bg-destructive/90 text-lg py-6"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : getTranslation(language, "submitRequest")}
+              {isSubmitting ? 'Submitting...' : getContent("submitRequest")}
               <Send className="ml-2 w-5 h-5" />
             </Button>
           </form>
@@ -162,7 +164,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
             onClick={onClose}
             className="mt-6 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium w-full text-center"
           >
-            {getTranslation(language, "close")}
+            {getContent("close")}
           </button>
         </div>
       </div>

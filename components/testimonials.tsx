@@ -5,6 +5,7 @@ import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
+import { useContent } from "@/lib/use-content"
 
 interface Testimonial {
   id: number
@@ -145,6 +146,7 @@ const defaultTestimonials: Testimonial[] = [
 
 export function Testimonials() {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
   const [currentStartIndex, setCurrentStartIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
@@ -164,12 +166,16 @@ export function Testimonials() {
 
   const loadTestimonials = async () => {
     try {
-      const response = await fetch('/api/testimonials')
+      const response = await fetch('/api/testimonials', {
+        cache: 'no-store',
+      })
       const result = await response.json()
-      if (result.success && result.data.length > 0) {
+      if (result.success && result.data && result.data.length > 0) {
         setTestimonials(result.data)
+        console.log('Testimonials loaded from database:', result.data.length)
       } else {
         // Fallback to default testimonials if database is empty
+        console.log('Database is empty, using default testimonials')
         setTestimonials(defaultTestimonials)
       }
     } catch (error) {
@@ -244,14 +250,14 @@ export function Testimonials() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
             <span className="text-sm font-semibold text-primary">
-              {getTranslation(language, "ourCustomers")}
+              {getContent("ourCustomers")}
             </span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-balance text-foreground">
-            {getTranslation(language, "whatOurCustomersSay")}
+            {getContent("whatOurCustomersSay")}
           </h2>
           <p className="text-lg text-foreground/70 leading-relaxed">
-            {getTranslation(language, "testimonialsDescription")}
+            {getContent("testimonialsDescription")}
           </p>
         </div>
 

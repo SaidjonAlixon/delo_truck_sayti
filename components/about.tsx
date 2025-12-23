@@ -3,9 +3,12 @@
 import { Shield, Award, Users, Clock } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
+import { useContent } from "@/lib/use-content"
+import { useEffect, useState } from "react"
 
 export function About() {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
 
   const features = [
     {
@@ -44,19 +47,19 @@ export function About() {
             </div>
             <div className="absolute -bottom-6 -right-6 bg-accent p-6 rounded-xl shadow-lg">
               <p className="text-4xl font-bold text-accent-foreground mb-1">5+</p>
-              <p className="text-sm text-accent-foreground/90">{getTranslation(language, "yearsOfExcellence")}</p>
+              <p className="text-sm text-accent-foreground/90">{getContent("yearsOfExcellence")}</p>
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="inline-block px-4 py-2 bg-primary/10 rounded-full">
-              <span className="text-sm font-semibold text-primary">{getTranslation(language, "aboutUs")}</span>
+              <span className="text-sm font-semibold text-primary">{getContent("aboutUs")}</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-balance text-foreground">
-              {getTranslation(language, "trustedTruckServicePartner")}
+              {getContent("trustedTruckServicePartner")}
             </h2>
-            <p className="text-lg text-foreground leading-relaxed">{getTranslation(language, "aboutDescription1")}</p>
-            <p className="text-lg text-foreground leading-relaxed">{getTranslation(language, "aboutDescription2")}</p>
+            <p className="text-lg text-foreground leading-relaxed">{getContent("aboutDescription1")}</p>
+            <p className="text-lg text-foreground leading-relaxed">{getContent("aboutDescription2")}</p>
 
             <div className="grid sm:grid-cols-2 gap-4 pt-4">
               {features.map((feature, index) => {
@@ -68,10 +71,10 @@ export function About() {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1 text-foreground">
-                        {getTranslation(language, feature.titleKey)}
+                        {getContent(feature.titleKey)}
                       </h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {getTranslation(language, feature.descKey)}
+                        {getContent(feature.descKey)}
                       </p>
                     </div>
                   </div>

@@ -8,9 +8,11 @@ import { useState } from "react"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
 import { sendContactToTelegram } from "@/lib/telegram-api"
+import { useContent } from "@/lib/use-content"
 
 export function Contact() {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -37,7 +39,7 @@ export function Contact() {
       
       setSubmitStatus({
         type: 'success',
-        message: getTranslation(language, "thankYouMessage")
+        message: getContent("thankYouMessage")
       })
       setFormData({ name: "", email: "", phone: "", service: "", message: "" })
     } catch (error) {
@@ -62,12 +64,12 @@ export function Contact() {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
-            <span className="text-sm font-semibold text-primary">{getTranslation(language, "getInTouch")}</span>
+            <span className="text-sm font-semibold text-primary">{getContent("getInTouch")}</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-balance text-foreground">
-            {getTranslation(language, "contactUsToday")}
+            {getContent("contactUsToday")}
           </h2>
-          <p className="text-lg text-foreground leading-relaxed">{getTranslation(language, "contactDescription")}</p>
+          <p className="text-lg text-foreground leading-relaxed">{getContent("contactDescription")}</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-stretch">
@@ -81,12 +83,12 @@ export function Contact() {
 
           <Card className="p-8 bg-card border-border flex flex-col">
             <h3 className="text-2xl font-bold mb-6 text-card-foreground">
-              {getTranslation(language, "requestService")}
+              {getContent("requestService")}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium mb-2 text-card-foreground">
-                  {getTranslation(language, "fullName")} *
+                  {getContent("fullName")} *
                 </label>
                 <input
                   type="text"
@@ -102,7 +104,7 @@ export function Contact() {
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-2 text-card-foreground">
-                  {getTranslation(language, "emailAddress")} *
+                  {getContent("emailAddress")} *
                 </label>
                 <input
                   type="email"
@@ -118,7 +120,7 @@ export function Contact() {
 
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium mb-2 text-card-foreground">
-                  {getTranslation(language, "phoneNumber")} *
+                  {getContent("phoneNumber")} *
                 </label>
                 <input
                   type="tel"
@@ -134,7 +136,7 @@ export function Contact() {
 
               <div>
                 <label htmlFor="service" className="block text-sm font-medium mb-2 text-card-foreground">
-                  {getTranslation(language, "serviceNeeded")} *
+                  {getContent("serviceNeeded")} *
                 </label>
                 <select
                   id="service"
@@ -144,7 +146,7 @@ export function Contact() {
                   required
                   className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-background text-foreground"
                 >
-                  <option value="">{getTranslation(language, "selectService")}</option>
+                  <option value="">{getContent("selectService")}</option>
                   <option value="roadside">Roadside Service</option>
                   <option value="in-shop">In Shop Service</option>
                   <option value="parking">Parking</option>
@@ -153,7 +155,7 @@ export function Contact() {
 
               <div>
                 <label htmlFor="message" className="block text-sm font-medium mb-2 text-card-foreground">
-                  {getTranslation(language, "additionalInfo")}
+                  {getContent("additionalInfo")}
                 </label>
                 <textarea
                   id="message"
@@ -162,7 +164,7 @@ export function Contact() {
                   onChange={handleChange}
                   rows={4}
                   className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none bg-background text-foreground"
-                  placeholder={getTranslation(language, "additionalInfoPlaceholder")}
+                  placeholder={getContent("additionalInfoPlaceholder")}
                 />
               </div>
 
@@ -183,7 +185,7 @@ export function Contact() {
                 disabled={isSubmitting}
               >
                 <Phone className="w-5 h-5 mr-2" />
-                {isSubmitting ? 'Submitting...' : getTranslation(language, "requestServiceButton")}
+                {isSubmitting ? 'Submitting...' : getContent("requestServiceButton")}
               </Button>
             </form>
           </Card>

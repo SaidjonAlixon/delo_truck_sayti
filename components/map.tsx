@@ -2,16 +2,18 @@
 
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
+import { useContent } from "@/lib/use-content"
 
 export function Map() {
   const { language } = useLanguage()
+  const { getTranslation: getContent } = useContent()
 
   return (
     <section className="py-16 px-4 bg-background dark:bg-slate-950">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">{getTranslation(language, "location" as any)}</h2>
-          <p className="text-lg text-muted-foreground">{getTranslation(language, "findUs" as any)}</p>
+          <h2 className="text-4xl font-bold mb-4 text-foreground">{getContent("location" as any)}</h2>
+          <p className="text-lg text-muted-foreground">{getContent("findUs" as any)}</p>
         </div>
 
         <div className="rounded-lg overflow-hidden shadow-lg">
@@ -30,7 +32,7 @@ export function Map() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
           <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-2 text-foreground">{getTranslation(language, "address" as any)}</h3>
+            <h3 className="text-xl font-bold mb-2 text-foreground">{getContent("address" as any)}</h3>
             <p className="text-muted-foreground">
               636 N Irwin St
               <br />
@@ -39,14 +41,14 @@ export function Map() {
           </div>
 
           <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-2 text-foreground">{getTranslation(language, "hours" as any)}</h3>
+            <h3 className="text-xl font-bold mb-2 text-foreground">{getContent("hours" as any)}</h3>
             <p className="text-muted-foreground">
               Mon - Fri: 8:00am - 6:00pm
             </p>
           </div>
 
           <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-2 text-foreground">{getTranslation(language, "phone" as any)}</h3>
+            <h3 className="text-xl font-bold mb-2 text-foreground">{getContent("phone" as any)}</h3>
             <p className="text-muted-foreground">
               +1 929-522-9913
             </p>

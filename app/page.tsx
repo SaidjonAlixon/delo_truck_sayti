@@ -12,23 +12,26 @@ import { SiteFooter } from "@/components/site-footer"
 import { Snow } from "@/components/snow"
 import { LanguageProvider } from "@/lib/language-context"
 import { ThemeProvider } from "@/lib/theme-context"
+import { TranslationsProvider } from "@/lib/translations-provider"
 
 export default function Home() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <main className="min-h-screen">
-          <Snow />
-          <Header />
-          <Hero />
-          <Footer />
-          <Services />
-          <About />
-          <Contact />
-          <Testimonials />
-          <Map />
-          <SiteFooter />
-        </main>
+        <TranslationsProvider>
+          <main className="min-h-screen">
+            <Snow />
+            <Header />
+            <Hero />
+            <Footer />
+            <Services />
+            <About />
+            <Contact />
+            <Testimonials />
+            <Map />
+            <SiteFooter />
+          </main>
+        </TranslationsProvider>
       </LanguageProvider>
     </ThemeProvider>
   )
