@@ -18,17 +18,29 @@ export default function AdminLogin() {
     setError("")
     setIsLoading(true)
 
-    // Simple authentication (in production, use proper authentication)
-    const ADMIN_USERNAME = process.env.NEXT_PUBLIC_ADMIN_USERNAME || "admin"
-    const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin123"
+    try {
+      const response = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      })
 
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      // Store session
-      sessionStorage.setItem("adminAuthenticated", "true")
-      sessionStorage.setItem("adminLoginTime", Date.now().toString())
-      router.push("/admin")
-    } else {
-      setError("Noto'g'ri login yoki parol")
+      const data = await response.json()
+
+      if (data.success) {
+        // Store session
+        sessionStorage.setItem("adminAuthenticated", "true")
+        sessionStorage.setItem("adminLoginTime", Date.now().toString())
+        router.push("/admin")
+      } else {
+        setError(data.message || "Invalid credentials")
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      setError("Connection error. Please try again.")
       setIsLoading(false)
     }
   }

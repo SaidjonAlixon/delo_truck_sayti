@@ -11,6 +11,8 @@ interface Service {
   id: string
   titleKey: string
   descKey: string
+  title?: string | null
+  description?: string | null
   price: string | null
   priceType: "starting" | "call" | "fixed"
   serviceId: string
@@ -21,8 +23,7 @@ interface Testimonial {
   id: number
   name: string
   role: string
-  textEn: string
-  textUz: string
+  text: string
   rating: number
 }
 
@@ -122,84 +123,96 @@ function ServicesManagement() {
   const [editingId, setEditingId] = useState<string | null>(null)
 
   useEffect(() => {
-    // Load services from localStorage or default
-    const saved = localStorage.getItem("adminServices")
-    if (saved) {
-      setServices(JSON.parse(saved))
-    } else {
-      // Load default services
-      const defaultServices: Service[] = [
-        {
-          id: "1",
-          titleKey: "computerDiagnostics",
-          descKey: "computerDiagnosticsDesc",
-          price: "$150",
-          priceType: "starting",
-          serviceId: "diagnostics",
-          image: "/services/diagnostics.jpg",
-        },
-        {
-          id: "2",
-          titleKey: "tireService",
-          descKey: "tireServiceDesc",
-          price: "$80",
-          priceType: "starting",
-          serviceId: "tire",
-          image: "/services/tire-service.jpg",
-        },
-        {
-          id: "3",
-          titleKey: "oilChange",
-          descKey: "oilChangeDesc",
-          price: "$200",
-          priceType: "starting",
-          serviceId: "oil",
-          image: "/services/oil-change.jpg",
-        },
-        {
-          id: "4",
-          titleKey: "suspensionSteering",
-          descKey: "suspensionSteeringDesc",
-          price: null,
-          priceType: "call",
-          serviceId: "suspension",
-          image: "/services/suspension.jpg",
-        },
-        {
-          id: "5",
-          titleKey: "transmissionRepair",
-          descKey: "transmissionRepairDesc",
-          price: null,
-          priceType: "call",
-          serviceId: "transmission",
-          image: "/services/transmission.jpg",
-        },
-        {
-          id: "6",
-          titleKey: "dotCarbInspections",
-          descKey: "dotCarbInspectionsDesc",
-          price: "$100",
-          priceType: "fixed",
-          serviceId: "dot",
-          image: "/services/dot-inspection.jpg",
-        },
-      ]
-      setServices(defaultServices)
-      localStorage.setItem("adminServices", JSON.stringify(defaultServices))
-    }
+    loadServices()
   }, [])
 
-  const saveServices = (newServices: Service[]) => {
-    setServices(newServices)
-    localStorage.setItem("adminServices", JSON.stringify(newServices))
-    // Update components/services.tsx to use this data
-    window.dispatchEvent(new Event("servicesUpdated"))
+  const loadServices = async () => {
+    try {
+      const response = await fetch('/api/services')
+      const result = await response.json()
+      if (result.success) {
+        // Transform database format to component format
+        const transformed = result.data.map((s: any) => ({
+          id: s.id.toString(),
+          titleKey: s.title_key,
+          descKey: s.desc_key,
+          title: s.title,
+          description: s.description,
+          price: s.price,
+          priceType: s.price_type,
+          serviceId: s.service_id,
+          image: s.image,
+        }))
+        setServices(transformed)
+      } else {
+        console.error('Failed to load services')
+      }
+    } catch (error) {
+      console.error('Error loading services:', error)
+    }
   }
 
-  const handleDelete = (id: string) => {
+  const saveServices = async (newServices: Service[]) => {
+    try {
+      // Save each service to database
+      for (const service of newServices) {
+        const exists = services.find(s => s.id === service.id)
+        if (exists) {
+          // Update existing
+          await fetch('/api/services', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: parseInt(service.id),
+              service_id: service.serviceId,
+              title_key: service.titleKey,
+              desc_key: service.descKey,
+              price: service.price,
+              price_type: service.priceType,
+              image: service.image,
+            }),
+          })
+        } else {
+          // Create new
+          await fetch('/api/services', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              service_id: service.serviceId,
+              title_key: service.titleKey,
+              desc_key: service.descKey,
+              price: service.price,
+              price_type: service.priceType,
+              image: service.image,
+            }),
+          })
+        }
+      }
+      setServices(newServices)
+      window.dispatchEvent(new Event("servicesUpdated"))
+    } catch (error) {
+      console.error('Error saving services:', error)
+      alert('Error saving services. Please try again.')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
     if (confirm("Bu xizmatni o'chirishni xohlaysizmi?")) {
-      const updated = services.filter((s) => s.id !== id)
-      saveServices(updated)
+      try {
+        const response = await fetch(`/api/services?id=${id}`, {
+          method: 'DELETE',
+        })
+        const result = await response.json()
+        if (result.success) {
+          await loadServices()
+          window.dispatchEvent(new Event("servicesUpdated"))
+        } else {
+          alert('Error deleting service: ' + (result.message || 'Unknown error'))
+        }
+      } catch (error) {
+        console.error('Error deleting service:', error)
+        alert('Error deleting service')
+      }
     }
   }
 
@@ -216,15 +229,69 @@ function ServicesManagement() {
       {(isAdding || editingId) && (
         <ServiceForm
           initialData={editingId ? services.find(s => s.id === editingId) : null}
-          onSave={(service) => {
-            if (editingId) {
-              const updated = services.map(s => s.id === editingId ? { ...service, id: editingId } : s)
-              saveServices(updated)
-              setEditingId(null)
-            } else {
-              const newId = Date.now().toString()
-              saveServices([...services, { ...service, id: newId }])
-              setIsAdding(false)
+          onSave={async (service: Service) => {
+            try {
+              if (editingId) {
+                // Update existing service
+                const response = await fetch('/api/services', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    id: parseInt(editingId),
+                    service_id: service.serviceId,
+                    title_key: service.titleKey,
+                    desc_key: service.descKey,
+                    title: service.title || null,
+                    description: service.description || null,
+                    price: service.price,
+                    price_type: service.priceType,
+                    image: service.image,
+                  }),
+                })
+                const result = await response.json()
+                if (result.success) {
+                  await loadServices()
+                  setEditingId(null)
+                  // Dispatch event to update frontend
+                  window.dispatchEvent(new Event("servicesUpdated"))
+                  // Also trigger storage event for cross-tab updates
+                  localStorage.setItem('servicesLastUpdated', Date.now().toString())
+                  alert('Service saved successfully! Changes will appear on the website.')
+                } else {
+                  alert('Error saving service: ' + (result.message || 'Unknown error'))
+                }
+              } else {
+                // Create new service
+                const response = await fetch('/api/services', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    service_id: service.serviceId,
+                    title_key: service.titleKey,
+                    desc_key: service.descKey,
+                    title: service.title || null,
+                    description: service.description || null,
+                    price: service.price,
+                    price_type: service.priceType,
+                    image: service.image,
+                  }),
+                })
+                const result = await response.json()
+                if (result.success) {
+                  await loadServices()
+                  setIsAdding(false)
+                  // Dispatch event to update frontend
+                  window.dispatchEvent(new Event("servicesUpdated"))
+                  // Also trigger storage event for cross-tab updates
+                  localStorage.setItem('servicesLastUpdated', Date.now().toString())
+                  alert('Service saved successfully! Changes will appear on the website.')
+                } else {
+                  alert('Error saving service: ' + (result.message || 'Unknown error'))
+                }
+              }
+            } catch (error) {
+              console.error('Error saving service:', error)
+              alert('Error saving service')
             }
           }}
           onCancel={() => {
@@ -261,6 +328,8 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
   const [formData, setFormData] = useState({
     titleKey: initialData?.titleKey || "",
     descKey: initialData?.descKey || "",
+    title: initialData?.title || "",
+    description: initialData?.description || "",
     price: initialData?.price || "",
     priceType: initialData?.priceType || "starting",
     serviceId: initialData?.serviceId || "",
@@ -272,24 +341,27 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
       <h3 className="text-xl font-bold mb-4">{initialData ? "Xizmatni Tahrirlash" : "Yangi Xizmat"}</h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Title Key (tarjima kaliti)</label>
+          <label className="block text-sm font-medium mb-2">Xizmat nomi (to'g'ridan-to'g'ri matn) *</label>
           <input
             type="text"
-            value={formData.titleKey}
-            onChange={(e) => setFormData({ ...formData, titleKey: e.target.value })}
+            value={formData.title || ""}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            placeholder="computerDiagnostics"
+            placeholder="Computer Diagnostics"
+            required
           />
+          <p className="text-xs text-muted-foreground mt-1">Bu matn saytda ko'rinadi</p>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Description Key (tarjima kaliti)</label>
-          <input
-            type="text"
-            value={formData.descKey}
-            onChange={(e) => setFormData({ ...formData, descKey: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            placeholder="computerDiagnosticsDesc"
+          <label className="block text-sm font-medium mb-2">Xizmat izohi (to'g'ridan-to'g'ri matn) *</label>
+          <textarea
+            value={formData.description || ""}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg bg-background text-foreground min-h-[100px]"
+            placeholder="Professional computer diagnostics for your vehicle"
+            required
           />
+          <p className="text-xs text-muted-foreground mt-1">Bu matn saytda ko'rinadi</p>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Service ID</label>
@@ -326,12 +398,48 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
         <div>
           <label className="block text-sm font-medium mb-2">Rasm manzili</label>
           <input
-            type="text"
+            type="url"
             value={formData.image}
             onChange={(e) => setFormData({ ...formData, image: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            placeholder="/services/diagnostics.jpg"
+            placeholder="https://example.com/image.jpg yoki /services/diagnostics.jpg"
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            To'liq rasm URL'i (https://example.com/image.jpg, .png, .webp) yoki mahalliy fayl yo'li (/services/image.jpg)
+          </p>
+          <p className="text-xs text-amber-600 mt-1">
+            ⚠️ Eslatma: Blog post URL'i emas, to'g'ridan-to'g'ri rasm faylining URL'i kerak! 
+            Rasmga o'ng klik qilib "Copy image address" yoki "Copy image URL" tanlang.
+          </p>
+          {formData.image && (
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground mb-1">Rasm ko'rinishi:</p>
+              <div className="w-full h-48 border rounded-lg overflow-hidden bg-muted flex items-center justify-center relative">
+                <img
+                  src={formData.image}
+                  alt="Preview"
+                  className="max-w-full max-h-full object-contain"
+                  onError={(e) => {
+                    const img = e.currentTarget
+                    img.style.display = 'none'
+                    const parent = img.parentElement
+                    if (parent && !parent.querySelector('.error-message')) {
+                      const errorDiv = document.createElement('div')
+                      errorDiv.className = 'error-message text-xs text-red-500 p-2 text-center'
+                      errorDiv.innerHTML = '❌ Rasm yuklanmadi!<br/>URL\'ni tekshiring.<br/>Rasm URL\'i to\'g\'ri bo\'lishi kerak (.jpg, .png, .webp)'
+                      parent.appendChild(errorDiv)
+                    }
+                  }}
+                  onLoad={(e) => {
+                    const errorMsg = e.currentTarget.parentElement?.querySelector('.error-message')
+                    if (errorMsg) {
+                      errorMsg.remove()
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <Button onClick={() => onSave(formData)}>Saqlash</Button>
@@ -348,27 +456,45 @@ function TestimonialsManagement() {
   const [editingId, setEditingId] = useState<number | null>(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem("adminTestimonials")
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setTestimonials(parsed)
-      } catch (e) {
-        console.error("Error loading testimonials:", e)
-      }
-    }
+    loadTestimonials()
   }, [])
 
-  const saveTestimonials = (newTestimonials: Testimonial[]) => {
+  const loadTestimonials = async () => {
+    try {
+      const response = await fetch('/api/testimonials')
+      const result = await response.json()
+      if (result.success) {
+        setTestimonials(result.data)
+      } else {
+        console.error('Failed to load testimonials')
+      }
+    } catch (error) {
+      console.error('Error loading testimonials:', error)
+    }
+  }
+
+  const saveTestimonials = async (newTestimonials: Testimonial[]) => {
+    // This will be handled by individual save operations
     setTestimonials(newTestimonials)
-    localStorage.setItem("adminTestimonials", JSON.stringify(newTestimonials))
     window.dispatchEvent(new Event("testimonialsUpdated"))
   }
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm("Bu izohni o'chirishni xohlaysizmi?")) {
-      const updated = testimonials.filter((t) => t.id !== id)
-      saveTestimonials(updated)
+      try {
+        const response = await fetch(`/api/testimonials?id=${id}`, {
+          method: 'DELETE',
+        })
+        const result = await response.json()
+        if (result.success) {
+          loadTestimonials()
+        } else {
+          alert('Error deleting testimonial')
+        }
+      } catch (error) {
+        console.error('Error deleting testimonial:', error)
+        alert('Error deleting testimonial')
+      }
     }
   }
 
@@ -385,15 +511,47 @@ function TestimonialsManagement() {
       {(isAdding || editingId) && (
         <TestimonialForm
           initialData={editingId ? testimonials.find(t => t.id === editingId) : null}
-          onSave={(testimonial: Testimonial) => {
-            if (editingId) {
-              const updated = testimonials.map(t => t.id === editingId ? { ...testimonial, id: editingId } : t)
-              saveTestimonials(updated)
-              setEditingId(null)
-            } else {
-              const newId = testimonials.length > 0 ? Math.max(...testimonials.map(t => t.id)) + 1 : 1
-              saveTestimonials([...testimonials, { ...testimonial, id: newId }])
-              setIsAdding(false)
+          onSave={async (testimonial: any) => {
+            try {
+              if (editingId) {
+                // Update existing testimonial
+                const response = await fetch('/api/testimonials', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    id: editingId,
+                    name: testimonial.name,
+                    role: testimonial.role,
+                    text: testimonial.textEn || testimonial.text,
+                    rating: testimonial.rating,
+                  }),
+                })
+                const result = await response.json()
+                if (result.success) {
+                  loadTestimonials()
+                  setEditingId(null)
+                }
+              } else {
+                // Create new testimonial
+                const response = await fetch('/api/testimonials', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name: testimonial.name,
+                    role: testimonial.role,
+                    text: testimonial.textEn || testimonial.text,
+                    rating: testimonial.rating,
+                  }),
+                })
+                const result = await response.json()
+                if (result.success) {
+                  loadTestimonials()
+                  setIsAdding(false)
+                }
+              }
+            } catch (error) {
+              console.error('Error saving testimonial:', error)
+              alert('Error saving testimonial')
             }
           }}
           onCancel={() => {
@@ -410,7 +568,7 @@ function TestimonialsManagement() {
               <h3 className="font-semibold">{testimonial.name}</h3>
               <p className="text-sm text-muted-foreground">{testimonial.role}</p>
               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                {testimonial.textUz || testimonial.textEn}
+                {testimonial.text || testimonial.textEn}
               </p>
             </div>
             <div className="flex gap-2">
@@ -432,8 +590,7 @@ function TestimonialForm({ onSave, onCancel, initialData }: any) {
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     role: initialData?.role || "",
-    textEn: initialData?.textEn || "",
-    textUz: initialData?.textUz || "",
+    text: initialData?.text || initialData?.textEn || "",
     rating: initialData?.rating || 5,
   })
 
@@ -466,22 +623,11 @@ function TestimonialForm({ onSave, onCancel, initialData }: any) {
         <div>
           <label className="block text-sm font-medium mb-2">Izoh (Inglizcha) *</label>
           <textarea
-            value={formData.textEn}
-            onChange={(e) => setFormData({ ...formData, textEn: e.target.value })}
+            value={formData.text}
+            onChange={(e) => setFormData({ ...formData, text: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
             rows={4}
-            placeholder="Inglizcha izoh kiriting"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Izoh (O'zbekcha) *</label>
-          <textarea
-            value={formData.textUz}
-            onChange={(e) => setFormData({ ...formData, textUz: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            rows={4}
-            placeholder="O'zbekcha izoh kiriting"
+            placeholder="Enter testimonial text in English"
             required
           />
         </div>

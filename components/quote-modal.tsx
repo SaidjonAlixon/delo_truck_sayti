@@ -57,7 +57,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
     } catch (error) {
       setSubmitStatus({
         type: 'error',
-        message: error instanceof Error ? error.message : 'Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.'
+        message: error instanceof Error ? error.message : 'An error occurred. Please try again.'
       })
     } finally {
       setIsSubmitting(false)
@@ -88,7 +88,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
                 required
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                placeholder={language === "uz" ? "Ismingizni kiriting" : "Enter your full name"}
+                placeholder="Enter your full name"
                 className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground/60"
               />
             </div>
@@ -102,7 +102,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
                 required
                 value={formData.phoneNumber}
                 onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                placeholder={language === "uz" ? "+998 90 123 45 67" : "(123) 456-7890"}
+                placeholder="(123) 456-7890"
                 className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground/60"
               />
             </div>
@@ -164,7 +164,7 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
               className="w-full bg-destructive hover:bg-destructive/90 text-lg py-6"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Yuborilmoqda...' : getTranslation(language, "submitRequest")}
+              {isSubmitting ? 'Submitting...' : getTranslation(language, "submitRequest")}
               <Send className="ml-2 w-5 h-5" />
             </Button>
           </form>

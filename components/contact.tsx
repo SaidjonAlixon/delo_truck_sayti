@@ -43,7 +43,7 @@ export function Contact() {
     } catch (error) {
       setSubmitStatus({
         type: 'error',
-        message: error instanceof Error ? error.message : 'Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.'
+        message: error instanceof Error ? error.message : 'An error occurred. Please try again.'
       })
     } finally {
       setIsSubmitting(false)
@@ -96,7 +96,7 @@ export function Contact() {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-background text-foreground placeholder:text-muted-foreground/60"
-                  placeholder={language === "uz" ? "Ismingizni kiriting" : "Enter your full name"}
+                  placeholder="Enter your full name"
                 />
               </div>
 
@@ -112,7 +112,7 @@ export function Contact() {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-background text-foreground placeholder:text-muted-foreground/60"
-                  placeholder={language === "uz" ? "example@email.com" : "example@email.com"}
+                  placeholder="example@email.com"
                 />
               </div>
 
@@ -128,7 +128,7 @@ export function Contact() {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-background text-foreground placeholder:text-muted-foreground/60"
-                  placeholder={language === "uz" ? "+998 90 123 45 67" : "(123) 456-7890"}
+                  placeholder="(123) 456-7890"
                 />
               </div>
 
@@ -186,7 +186,7 @@ export function Contact() {
                 disabled={isSubmitting}
               >
                 <Phone className="w-5 h-5 mr-2" />
-                {isSubmitting ? 'Yuborilmoqda...' : getTranslation(language, "requestServiceButton")}
+                {isSubmitting ? 'Submitting...' : getTranslation(language, "requestServiceButton")}
               </Button>
             </form>
           </Card>

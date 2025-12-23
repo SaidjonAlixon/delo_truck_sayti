@@ -161,39 +161,92 @@ export function Services() {
   const [services, setServices] = useState(defaultServices)
 
   useEffect(() => {
-    // Always use defaultServices to ensure all services are displayed
-    setServices(defaultServices)
-
-    // Listen for updates from admin panel (if needed)
+    loadServices()
+    
+    // Listen for updates from admin panel
     const handleUpdate = () => {
-      const saved = localStorage.getItem("adminServices")
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved)
-          // Merge with defaultServices to ensure all services are included
-          const defaultIds = new Set(defaultServices.map(s => s.serviceId))
-          const savedServices = parsed.map((s: any) => ({
-            ...s,
-            icon: iconMap[s.serviceId] || Search,
-          }))
-          // Combine: use saved services if they exist, otherwise use defaults
-          const combined = defaultServices.map(defaultService => {
-            const saved = savedServices.find((s: any) => s.serviceId === defaultService.serviceId)
-            return saved || defaultService
-          })
-          setServices(combined)
-        } catch (e) {
-          console.error("Error loading services:", e)
-          setServices(defaultServices)
-        }
-      } else {
-        setServices(defaultServices)
-      }
+      console.log('Services updated event received')
+      loadServices()
     }
 
+    // Listen to custom event
     window.addEventListener("servicesUpdated", handleUpdate)
-    return () => window.removeEventListener("servicesUpdated", handleUpdate)
+    
+    // Listen to storage events for cross-tab updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'servicesLastUpdated') {
+        console.log('Services updated via storage event')
+        loadServices()
+      }
+    }
+    window.addEventListener("storage", handleStorageChange)
+    
+    // Check for updates when page becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadServices()
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    
+    // Reload on window focus (when user switches back to tab)
+    window.addEventListener("focus", loadServices)
+    
+    // Poll localStorage for updates (for same-tab updates)
+    const storageCheckInterval = setInterval(() => {
+      const lastUpdated = localStorage.getItem('servicesLastUpdated')
+      if (lastUpdated) {
+        const saved = sessionStorage.getItem('lastServicesCheck')
+        if (!saved || saved !== lastUpdated) {
+          sessionStorage.setItem('lastServicesCheck', lastUpdated)
+          loadServices()
+        }
+      }
+    }, 1000)
+    
+    return () => {
+      window.removeEventListener("servicesUpdated", handleUpdate)
+      window.removeEventListener("storage", handleStorageChange)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("focus", loadServices)
+      clearInterval(storageCheckInterval)
+    }
   }, [])
+
+  const loadServices = async () => {
+    try {
+      const response = await fetch('/api/services', {
+        cache: 'no-store', // Prevent caching
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
+      const result = await response.json()
+      if (result.success && result.data.length > 0) {
+        // Transform database format to component format
+        const transformed = result.data.map((s: any) => ({
+          id: s.id.toString(),
+          titleKey: s.title_key as any,
+          descKey: s.desc_key as any,
+          title: s.title,
+          description: s.description,
+          price: s.price,
+          priceType: s.price_type as "starting" | "call" | "fixed",
+          serviceId: s.service_id,
+          image: s.image,
+          icon: iconMap[s.service_id] || Search,
+        }))
+        setServices(transformed)
+      } else {
+        // Fallback to default services if database is empty
+        setServices(defaultServices)
+      }
+    } catch (error) {
+      console.error("Error loading services:", error)
+      // Fallback to default services on error
+      setServices(defaultServices)
+    }
+  }
 
   const handleGetQuote = (serviceId: string) => {
     setSelectedService(serviceId)
@@ -226,11 +279,12 @@ export function Services() {
                 <div
                   className="absolute inset-0 opacity-60 group-hover:opacity-85 transition-opacity duration-300"
                   style={{
-                    backgroundImage: `url(${service.image})`,
+                    backgroundImage: service.image && service.image.trim() ? `url(${service.image})` : 'none',
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     filter: "blur(2px)",
                     transform: "scale(1.05)",
+                    backgroundColor: service.image && service.image.trim() ? 'transparent' : '#1a1a1a',
                   }}
                 />
                 {/* Dark Overlay */}
@@ -239,7 +293,7 @@ export function Services() {
                 {/* Service Title - Visible until hover */}
                 <div className="relative z-10 flex items-center justify-center h-full opacity-100 group-hover:opacity-0 transition-opacity duration-300">
                   <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-center">
-                    {getTranslation(language, service.titleKey)}
+                    {service.title || getTranslation(language, service.titleKey)}
                   </h3>
                 </div>
 
@@ -250,10 +304,10 @@ export function Services() {
                       <Icon className="w-8 h-8 text-primary drop-shadow-lg" />
                     </div>
                     <h3 className="text-2xl font-bold mb-3 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                      {getTranslation(language, service.titleKey)}
+                      {service.title || getTranslation(language, service.titleKey)}
                     </h3>
                     <p className="text-white leading-relaxed mb-6 min-h-[72px] drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-                      {getTranslation(language, service.descKey)}
+                      {service.description || getTranslation(language, service.descKey)}
                     </p>
                   </div>
 

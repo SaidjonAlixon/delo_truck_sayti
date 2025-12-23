@@ -6,15 +6,13 @@ import { useState } from "react"
 import { useTheme } from "@/lib/theme-context"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
-import { FlagIcon } from "@/components/flag-icon"
 import { QuoteModal } from "@/components/quote-modal"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [langMenuOpen, setLangMenuOpen] = useState(false)
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
-  const { language, setLanguage } = useLanguage()
+  const { language } = useLanguage()
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -56,41 +54,6 @@ export function Header() {
               {getTranslation(language, "about")}
             </button>
 
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="flex items-center gap-2"
-              >
-                <FlagIcon countryCode={language === "en" ? "us" : "uz"} />
-              </Button>
-              {langMenuOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-background border border-border rounded-md shadow-lg py-2 z-50">
-                  <button
-                    onClick={() => {
-                      setLanguage("en")
-                      setLangMenuOpen(false)
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
-                  >
-                    <FlagIcon countryCode="us" />
-                    English
-                  </button>
-                  <button
-                    onClick={() => {
-                      setLanguage("uz")
-                      setLangMenuOpen(false)
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
-                  >
-                    <FlagIcon countryCode="uz" />
-                    O'zbek
-                  </button>
-                </div>
-              )}
-            </div>
-
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
@@ -125,27 +88,6 @@ export function Header() {
               >
                 {getTranslation(language, "about")}
               </button>
-
-              <div className="flex gap-2">
-                <Button
-                  variant={language === "en" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setLanguage("en")}
-                  className="flex items-center gap-2"
-                >
-                  <FlagIcon countryCode="us" />
-                  English
-                </Button>
-                <Button
-                  variant={language === "uz" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setLanguage("uz")}
-                  className="flex items-center gap-2"
-                >
-                  <FlagIcon countryCode="uz" />
-                  O'zbek
-                </Button>
-              </div>
 
               <Button variant="outline" size="sm" onClick={toggleTheme}>
                 {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
