@@ -19,20 +19,45 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { service_id, title_key, desc_key, title, description, price, price_type, image } = body
+    const { service_id, title_key, desc_key, title, description, price, price_type, image, discount_percent, sale_start_date, sale_end_date } = body
+
+    // Convert dates to proper format
+    let saleStartDate = null
+    let saleEndDate = null
+    
+    if (sale_start_date) {
+      try {
+        saleStartDate = new Date(sale_start_date).toISOString()
+      } catch (e) {
+        console.error('Invalid sale_start_date:', sale_start_date)
+      }
+    }
+    
+    if (sale_end_date) {
+      try {
+        saleEndDate = new Date(sale_end_date).toISOString()
+      } catch (e) {
+        console.error('Invalid sale_end_date:', sale_end_date)
+      }
+    }
+
+    // Convert discount_percent to integer if provided
+    const discountPercent = discount_percent !== null && discount_percent !== undefined && discount_percent !== '' 
+      ? parseInt(discount_percent) 
+      : null
 
     const result = await pool.query(
-      `INSERT INTO services (service_id, title_key, desc_key, title, description, price, price_type, image)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO services (service_id, title_key, desc_key, title, description, price, price_type, image, discount_percent, sale_start_date, sale_end_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
-      [service_id, title_key, desc_key, title || null, description || null, price, price_type, image]
+      [service_id, title_key, desc_key, title || null, description || null, price, price_type, image, discountPercent, saleStartDate, saleEndDate]
     )
 
     return NextResponse.json({ success: true, data: result.rows[0] })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating service:', error)
     return NextResponse.json(
-      { success: false, message: 'Failed to create service' },
+      { success: false, message: `Failed to create service: ${error.message || 'Unknown error'}` },
       { status: 500 }
     )
   }
@@ -42,14 +67,39 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, service_id, title_key, desc_key, title, description, price, price_type, image } = body
+    const { id, service_id, title_key, desc_key, title, description, price, price_type, image, discount_percent, sale_start_date, sale_end_date } = body
+
+    // Convert dates to proper format
+    let saleStartDate = null
+    let saleEndDate = null
+    
+    if (sale_start_date) {
+      try {
+        saleStartDate = new Date(sale_start_date).toISOString()
+      } catch (e) {
+        console.error('Invalid sale_start_date:', sale_start_date)
+      }
+    }
+    
+    if (sale_end_date) {
+      try {
+        saleEndDate = new Date(sale_end_date).toISOString()
+      } catch (e) {
+        console.error('Invalid sale_end_date:', sale_end_date)
+      }
+    }
+
+    // Convert discount_percent to integer if provided
+    const discountPercent = discount_percent !== null && discount_percent !== undefined && discount_percent !== '' 
+      ? parseInt(discount_percent) 
+      : null
 
     const result = await pool.query(
       `UPDATE services 
-       SET service_id = $1, title_key = $2, desc_key = $3, title = $4, description = $5, price = $6, price_type = $7, image = $8, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $9
+       SET service_id = $1, title_key = $2, desc_key = $3, title = $4, description = $5, price = $6, price_type = $7, image = $8, discount_percent = $9, sale_start_date = $10, sale_end_date = $11, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $12
        RETURNING *`,
-      [service_id, title_key, desc_key, title || null, description || null, price, price_type, image, id]
+      [service_id, title_key, desc_key, title || null, description || null, price, price_type, image, discountPercent, saleStartDate, saleEndDate, id]
     )
 
     if (result.rows.length === 0) {
@@ -60,10 +110,10 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: result.rows[0] })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating service:', error)
     return NextResponse.json(
-      { success: false, message: 'Failed to update service' },
+      { success: false, message: `Failed to update service: ${error.message || 'Unknown error'}` },
       { status: 500 }
     )
   }

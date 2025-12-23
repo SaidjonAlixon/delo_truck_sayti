@@ -8,6 +8,72 @@ import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
 import { QuoteModal } from "@/components/quote-modal"
 
+// Countdown Timer Component
+function CountdownTimer({ endDate }: { endDate: string }) {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    isExpired: false
+  })
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime()
+      const end = new Date(endDate).getTime()
+      const difference = end - now
+
+      if (difference <= 0) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true }
+      }
+
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((difference % (1000 * 60)) / 1000),
+        isExpired: false
+      }
+    }
+
+    setTimeLeft(calculateTimeLeft())
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [endDate])
+
+  if (timeLeft.isExpired) {
+    return (
+      <div className="text-xs text-red-400 font-semibold">
+        Aksiya tugagan
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <div className="bg-red-600/90 backdrop-blur-sm px-2 py-1 rounded text-white font-bold">
+        {String(timeLeft.days).padStart(2, '0')}d
+      </div>
+      <span className="text-white">:</span>
+      <div className="bg-red-600/90 backdrop-blur-sm px-2 py-1 rounded text-white font-bold">
+        {String(timeLeft.hours).padStart(2, '0')}h
+      </div>
+      <span className="text-white">:</span>
+      <div className="bg-red-600/90 backdrop-blur-sm px-2 py-1 rounded text-white font-bold">
+        {String(timeLeft.minutes).padStart(2, '0')}m
+      </div>
+      <span className="text-white">:</span>
+      <div className="bg-red-600/90 backdrop-blur-sm px-2 py-1 rounded text-white font-bold">
+        {String(timeLeft.seconds).padStart(2, '0')}s
+      </div>
+    </div>
+  )
+}
+
 const iconMap: { [key: string]: any } = {
   diagnostics: Search,
   tire: Circle,
@@ -235,6 +301,9 @@ export function Services() {
           serviceId: s.service_id,
           image: s.image,
           icon: iconMap[s.service_id] || Search,
+          discountPercent: s.discount_percent,
+          saleStartDate: s.sale_start_date,
+          saleEndDate: s.sale_end_date,
         }))
         setServices(transformed)
       } else {
@@ -255,7 +324,7 @@ export function Services() {
 
   return (
     <section id="services" className="py-20 bg-muted/30 w-full">
-      <div className="container mx-auto px-4 w-full max-w-7xl">
+      <div className="container mx-auto px-6 w-full max-w-full">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
             <span className="text-sm font-semibold text-primary">{getTranslation(language, "ourServices")}</span>
@@ -266,15 +335,42 @@ export function Services() {
           <p className="text-lg text-foreground leading-relaxed">{getTranslation(language, "servicesDescription")}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full max-w-full">
           {services.map((service, index) => {
             const Icon = service.icon
+            
+            // Check if sale is active
+            const now = new Date()
+            const saleStart = service.saleStartDate ? new Date(service.saleStartDate) : null
+            const saleEnd = service.saleEndDate ? new Date(service.saleEndDate) : null
+            const isSaleActive = service.discountPercent && saleStart && saleEnd && now >= saleStart && now <= saleEnd
+            
+            // Calculate discounted price
+            let originalPrice = service.price
+            let discountedPrice = null
+            if (isSaleActive && service.price && service.priceType !== "call") {
+              const priceNum = parseFloat(service.price.replace(/[^0-9.]/g, ''))
+              if (!isNaN(priceNum)) {
+                const discount = priceNum * (service.discountPercent / 100)
+                discountedPrice = priceNum - discount
+                const priceSymbol = service.price.includes('$') ? '$' : ''
+                discountedPrice = `${priceSymbol}${discountedPrice.toFixed(2)}`
+              }
+            }
+            
             return (
               <Card
                 key={index}
                 id={`service-${service.serviceId}`}
-                className="relative p-8 hover:shadow-xl transition-all bg-card border-border overflow-hidden group min-h-[450px]"
+                className="relative p-8 hover:shadow-xl transition-all bg-card border-border overflow-hidden group min-h-[450px] w-full h-full"
               >
+                {/* Sale Badge - Top Right */}
+                {isSaleActive && (
+                  <div className="absolute top-4 right-4 z-20 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                    -{service.discountPercent}%
+                  </div>
+                )}
+                
                 {/* Background Image with Blur */}
                 <div
                   className="absolute inset-0 opacity-60 group-hover:opacity-85 transition-opacity duration-300"
@@ -291,7 +387,19 @@ export function Services() {
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-300" />
 
                 {/* Service Title - Visible until hover */}
-                <div className="relative z-10 flex items-center justify-center h-full opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+                <div className="relative z-10 flex flex-col items-center justify-center h-full opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+                  {/* Discounted Price on Top */}
+                  {isSaleActive && discountedPrice && (
+                    <div className="mb-4 text-center">
+                      <div className="bg-red-600/90 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-red-400 shadow-lg">
+                        <p className="text-xs text-white/90 mb-1">Sale Price</p>
+                        <p className="text-3xl font-bold text-white">{discountedPrice}</p>
+                      </div>
+                      <div className="mt-2">
+                        <CountdownTimer endDate={service.saleEndDate!} />
+                      </div>
+                    </div>
+                  )}
                   <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-center">
                     {service.title || getTranslation(language, service.titleKey)}
                   </h3>
@@ -311,27 +419,54 @@ export function Services() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-white/30">
-                    <div className="bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-primary/50">
-                      {service.priceType === "call" ? (
-                        <p className="text-xl font-bold text-blue-400 drop-shadow-lg">{getTranslation(language, "callForPrice")}</p>
-                      ) : (
-                        <div>
-                          {service.priceType === "starting" && (
-                            <p className="text-sm text-white/90 mb-1 font-medium drop-shadow-md">{getTranslation(language, "startingAt")}</p>
-                          )}
-                          <p className="text-2xl font-bold text-blue-400 drop-shadow-lg">{service.price}</p>
+                  <div className="flex flex-col gap-3 pt-4 border-t border-white/30">
+                    {/* Countdown Timer */}
+                    {isSaleActive && saleEnd && (
+                      <div className="bg-red-600/20 backdrop-blur-sm px-3 py-2 rounded-lg border border-red-500/50">
+                        <p className="text-xs text-white/90 mb-1 text-center">Sale Ends:</p>
+                        <div className="flex justify-center">
+                          <CountdownTimer endDate={service.saleEndDate!} />
                         </div>
-                      )}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-primary/50">
+                        {service.priceType === "call" ? (
+                          <p className="text-xl font-bold text-blue-400 drop-shadow-lg">{getTranslation(language, "callForPrice")}</p>
+                        ) : (
+                          <div>
+                            {isSaleActive && discountedPrice ? (
+                              <>
+                                <p className="text-xs text-white/70 line-through mb-1">{service.price}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-2xl font-bold text-green-400 drop-shadow-lg">{discountedPrice}</p>
+                                  <span className="text-xs bg-red-600 px-2 py-1 rounded text-white font-bold">-{service.discountPercent}%</span>
+                                </div>
+                                {service.priceType === "starting" && (
+                                  <p className="text-xs text-white/90 mt-1">{getTranslation(language, "startingAt")}</p>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                {service.priceType === "starting" && (
+                                  <p className="text-sm text-white/90 mb-1 font-medium drop-shadow-md">{getTranslation(language, "startingAt")}</p>
+                                )}
+                                <p className="text-2xl font-bold text-blue-400 drop-shadow-lg">{service.price}</p>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="lg"
+                        className="bg-red-700 hover:bg-red-800 text-white font-bold border-2 border-white/30 shadow-lg hover:shadow-xl transition-all"
+                        onClick={() => handleGetQuote(service.serviceId)}
+                      >
+                        {getTranslation(language, "getAQuote")}
+                      </Button>
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="lg"
-                      className="bg-red-700 hover:bg-red-800 text-white font-bold border-2 border-white/30 shadow-lg hover:shadow-xl transition-all"
-                      onClick={() => handleGetQuote(service.serviceId)}
-                    >
-                      {getTranslation(language, "getAQuote")}
-                    </Button>
                   </div>
                 </div>
               </Card>

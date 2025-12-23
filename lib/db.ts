@@ -35,6 +35,14 @@ export async function initDatabase() {
       ADD COLUMN IF NOT EXISTS title VARCHAR(500),
       ADD COLUMN IF NOT EXISTS description TEXT
     `)
+    
+    // Add sale/discount columns if they don't exist (migration)
+    await pool.query(`
+      ALTER TABLE services 
+      ADD COLUMN IF NOT EXISTS discount_percent INTEGER DEFAULT NULL,
+      ADD COLUMN IF NOT EXISTS sale_start_date TIMESTAMP DEFAULT NULL,
+      ADD COLUMN IF NOT EXISTS sale_end_date TIMESTAMP DEFAULT NULL
+    `)
 
     // Create testimonials table
     await pool.query(`

@@ -17,6 +17,9 @@ interface Service {
   priceType: "starting" | "call" | "fixed"
   serviceId: string
   image: string
+  discountPercent?: number | null
+  saleStartDate?: string | null
+  saleEndDate?: string | null
 }
 
 interface Testimonial {
@@ -142,6 +145,9 @@ function ServicesManagement() {
           priceType: s.price_type,
           serviceId: s.service_id,
           image: s.image,
+          discountPercent: s.discount_percent,
+          saleStartDate: s.sale_start_date,
+          saleEndDate: s.sale_end_date,
         }))
         setServices(transformed)
       } else {
@@ -246,6 +252,9 @@ function ServicesManagement() {
                     price: service.price,
                     price_type: service.priceType,
                     image: service.image,
+                    discount_percent: service.discountPercent || null,
+                    sale_start_date: service.saleStartDate ? new Date(service.saleStartDate).toISOString() : null,
+                    sale_end_date: service.saleEndDate ? new Date(service.saleEndDate).toISOString() : null,
                   }),
                 })
                 const result = await response.json()
@@ -274,6 +283,9 @@ function ServicesManagement() {
                     price: service.price,
                     price_type: service.priceType,
                     image: service.image,
+                    discount_percent: service.discountPercent || null,
+                    sale_start_date: service.saleStartDate ? new Date(service.saleStartDate).toISOString() : null,
+                    sale_end_date: service.saleEndDate ? new Date(service.saleEndDate).toISOString() : null,
                   }),
                 })
                 const result = await response.json()
@@ -334,6 +346,9 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
     priceType: initialData?.priceType || "starting",
     serviceId: initialData?.serviceId || "",
     image: initialData?.image || "",
+    discountPercent: initialData?.discountPercent || null,
+    saleStartDate: initialData?.saleStartDate ? new Date(initialData.saleStartDate).toISOString().slice(0, 16) : "",
+    saleEndDate: initialData?.saleEndDate ? new Date(initialData.saleEndDate).toISOString().slice(0, 16) : "",
   })
 
   return (
@@ -441,7 +456,64 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
             </div>
           )}
         </div>
-        <div className="flex gap-2">
+        
+        {/* Aksiya sozlamalari */}
+        <div className="border-t pt-4 mt-4">
+          <h4 className="text-lg font-semibold mb-4">Aksiya sozlamalari (ixtiyoriy)</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Chegirma foizi (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.discountPercent || ""}
+                onChange={(e) => setFormData({ ...formData, discountPercent: e.target.value ? parseInt(e.target.value) : null })}
+                className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
+                placeholder="Masalan: 20"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Aksiya chegirma foizi (0-100%)</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Aksiya boshlanish vaqti</label>
+              <input
+                type="datetime-local"
+                value={formData.saleStartDate || ""}
+                onChange={(e) => setFormData({ ...formData, saleStartDate: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Aksiya qachon boshlanishi</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Aksiya tugash vaqti</label>
+              <input
+                type="datetime-local"
+                value={formData.saleEndDate || ""}
+                onChange={(e) => setFormData({ ...formData, saleEndDate: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Aksiya qachon tugashi (bu vaqtgacha countdown timer ishlaydi)</p>
+            </div>
+            {formData.discountPercent && formData.price && formData.priceType !== "call" && (
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Chegirma narx:</p>
+                <p className="text-lg font-bold text-green-700 dark:text-green-300">
+                  {(() => {
+                    const originalPrice = parseFloat(formData.price.replace(/[^0-9.]/g, ''))
+                    const discount = originalPrice * (formData.discountPercent / 100)
+                    const finalPrice = originalPrice - discount
+                    return `$${finalPrice.toFixed(2)}` + (formData.price.includes('$') ? '' : '')
+                  })()}
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  Asl narx: {formData.price} - {formData.discountPercent}% = Chegirma narx
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex gap-2 mt-6">
           <Button onClick={() => onSave(formData)}>Saqlash</Button>
           <Button variant="outline" onClick={onCancel}>Bekor qilish</Button>
         </div>
