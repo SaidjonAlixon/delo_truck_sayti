@@ -145,12 +145,9 @@ export function Contact() {
                   className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-background text-foreground"
                 >
                   <option value="">{getTranslation(language, "selectService")}</option>
-                  <option value="diagnostics">{getTranslation(language, "computerDiagnostics")}</option>
-                  <option value="tire">{getTranslation(language, "tireService")}</option>
-                  <option value="oil">{getTranslation(language, "oilChange")}</option>
-                  <option value="suspension">{getTranslation(language, "suspensionSteering")}</option>
-                  <option value="transmission">{getTranslation(language, "transmissionRepair")}</option>
-                  <option value="inspection">{getTranslation(language, "dotCarbInspections")}</option>
+                  <option value="roadside">Roadside Service</option>
+                  <option value="in-shop">In Shop Service</option>
+                  <option value="parking">Parking</option>
                 </select>
               </div>
 

@@ -24,7 +24,7 @@ export const translations = {
     heroSlide2Title: "Professional Mechanics With Real Experience",
     heroSlide2Description:
       "Our team has serviced over 1000+ trucks with 5+ years of combined experience. We've successfully completed major repairs and maintenance projects for commercial fleets across New York.",
-    heroSlide3Title: "24/7 Emergency Truck Service Available",
+    heroSlide3Title: "Emergency Truck Service Available",
     heroSlide3Description:
       "When your truck breaks down, every minute counts. Our emergency service team is available around the clock to get you back on the road quickly and safely.",
     contactUsToday: "Contact Us Now",

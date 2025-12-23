@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { QuoteModal } from "@/components/quote-modal"
 
 interface HeroSlide {
   title: string
@@ -15,6 +16,7 @@ interface HeroSlide {
 export function Hero() {
   const { language } = useLanguage()
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
 
   const slides: HeroSlide[] = useMemo(
     () => [
@@ -98,12 +100,7 @@ export function Hero() {
                 <Button
                   size="lg"
                   className="bg-red-600 hover:bg-red-700 text-white text-lg h-14 px-8 uppercase font-semibold"
-                  onClick={() => {
-                    const contactSection = document.getElementById('contact')
-                    if (contactSection) {
-                      contactSection.scrollIntoView({ behavior: 'smooth' })
-                    }
-                  }}
+                  onClick={() => setIsQuoteModalOpen(true)}
                 >
                   {getTranslation(language, "contactUsToday")}
                 </Button>
@@ -144,6 +141,11 @@ export function Hero() {
           />
         ))}
       </div>
+
+      <QuoteModal
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+      />
     </section>
   )
 }

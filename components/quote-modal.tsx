@@ -117,20 +117,9 @@ export function QuoteModal({ isOpen, onClose, selectedService }: QuoteModalProps
                 className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">{getTranslation(language, "selectService")}</option>
-                <option value="diagnostics">{getTranslation(language, "computerDiagnostics")}</option>
-                <option value="tire">{getTranslation(language, "tireService")}</option>
-                <option value="oil">{getTranslation(language, "oilChange")}</option>
-                <option value="suspension">{getTranslation(language, "suspensionSteering")}</option>
-                <option value="transmission">{getTranslation(language, "transmissionRepair")}</option>
-                <option value="dot">{getTranslation(language, "dotCarbInspections")}</option>
-                <option value="roadside">{getTranslation(language, "roadsideService")}</option>
-                <option value="ac">{getTranslation(language, "acService")}</option>
-                <option value="brake">{getTranslation(language, "brakeService")}</option>
-                <option value="pm">{getTranslation(language, "pmService")}</option>
-                <option value="carb">{getTranslation(language, "carbInspection")}</option>
-                <option value="def">{getTranslation(language, "defService")}</option>
-                <option value="dpf">{getTranslation(language, "dpfCleaning")}</option>
-                <option value="jumpstart">{getTranslation(language, "jumpStarts")}</option>
+                <option value="roadside">Roadside Service</option>
+                <option value="in-shop">In Shop Service</option>
+                <option value="parking">Parking</option>
               </select>
             </div>
 
