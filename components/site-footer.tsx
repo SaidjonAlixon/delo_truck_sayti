@@ -139,19 +139,18 @@ export function SiteFooter() {
                 <li className="flex items-start gap-1.5">
                   <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p>+1 (555) 123-4567</p>
-                    <p>+1 (555) 123-4568</p>
+                    <p>+1 929-522-9913</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-1.5">
                   <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>info@delotruckcenter.com</span>
+                  <span>delotruckcenter@gmail.com</span>
                 </li>
                 <li className="flex items-start gap-1.5">
                   <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p>123 Truck Service Road</p>
-                    <p>New York, NY 10001</p>
+                    <p>636 N Irwin St</p>
+                    <p>Dayton, OH 45403</p>
                   </div>
                 </li>
               </ul>

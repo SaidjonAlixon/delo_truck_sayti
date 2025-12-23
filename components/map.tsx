@@ -32,27 +32,23 @@ export function Map() {
           <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow">
             <h3 className="text-xl font-bold mb-2 text-foreground">{getTranslation(language, "address" as any)}</h3>
             <p className="text-muted-foreground">
-              123 Truck Service Road
+              636 N Irwin St
               <br />
-              New York, NY 10001
+              Dayton, OH 45403
             </p>
           </div>
 
           <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow">
             <h3 className="text-xl font-bold mb-2 text-foreground">{getTranslation(language, "hours" as any)}</h3>
             <p className="text-muted-foreground">
-              Mon - Fri: 8:00 AM - 6:00 PM
-              <br />
-              Sat - Sun: 9:00 AM - 4:00 PM
+              Mon - Fri: 8:00am - 6:00pm
             </p>
           </div>
 
           <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow">
             <h3 className="text-xl font-bold mb-2 text-foreground">{getTranslation(language, "phone" as any)}</h3>
             <p className="text-muted-foreground">
-              +1 (555) 123-4567
-              <br />
-              +1 (555) 987-6543
+              +1 929-522-9913
             </p>
           </div>
         </div>

@@ -23,7 +23,7 @@ export const translations = {
       "Delo Truck Center LLC provides comprehensive truck repair and maintenance services for commercial vehicles. From diagnostics to DOT inspections, we keep your fleet running smoothly.",
     heroSlide2Title: "Professional Mechanics With Real Experience",
     heroSlide2Description:
-      "Our team has serviced over 1000+ trucks with 15+ years of combined experience. We've successfully completed major repairs and maintenance projects for commercial fleets across New York.",
+      "Our team has serviced over 1000+ trucks with 5+ years of combined experience. We've successfully completed major repairs and maintenance projects for commercial fleets across New York.",
     heroSlide3Title: "24/7 Emergency Truck Service Available",
     heroSlide3Description:
       "When your truck breaks down, every minute counts. Our emergency service team is available around the clock to get you back on the road quickly and safely.",
@@ -110,7 +110,7 @@ export const translations = {
     // About Section
     aboutUs: "About Us",
     trustedTruckServicePartner: "Your Trusted Truck Service Partner",
-    aboutDescription1: "Delo Truck Center LLC has been serving the commercial trucking industry for over 15 years. We specialize in comprehensive truck repair, maintenance, and inspection services for all types of commercial vehicles.",
+    aboutDescription1: "Delo Truck Center LLC has been serving the commercial trucking industry for over 5 years. We specialize in comprehensive truck repair, maintenance, and inspection services for all types of commercial vehicles.",
     aboutDescription2: "Our state-of-the-art facility is equipped with the latest diagnostic tools and staffed by certified technicians who are committed to keeping your fleet running safely and efficiently.",
     yearsOfExcellence: "Years of Excellence",
     certifiedTechnicians: "Certified Technicians",

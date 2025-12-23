@@ -18,8 +18,7 @@ export function Footer() {
             </div>
             <div>
               <p className="text-sm text-background/70 mb-1">{getTranslation(language, "phone")}</p>
-              <p className="text-lg font-bold text-background">+1 (555) 123-4567</p>
-              <p className="text-lg font-bold text-background">+1 (555) 123-4568</p>
+              <p className="text-lg font-bold text-background">+1 929-522-9913</p>
             </div>
           </div>
 
@@ -30,7 +29,7 @@ export function Footer() {
             </div>
             <div>
               <p className="text-sm text-background/70 mb-1">Mon - Fri</p>
-              <p className="text-lg font-bold text-background">8:30 am - 5:00 pm</p>
+              <p className="text-lg font-bold text-background">8:00am - 6:00pm</p>
             </div>
           </div>
 
@@ -41,8 +40,8 @@ export function Footer() {
             </div>
             <div>
               <p className="text-sm text-background/70 mb-1">{getTranslation(language, "address")}</p>
-              <p className="text-lg font-bold text-background">123 Truck Service Road,</p>
-              <p className="text-lg font-bold text-background">New York, NY 10001</p>
+              <p className="text-lg font-bold text-background">636 N Irwin St,</p>
+              <p className="text-lg font-bold text-background">Dayton, OH 45403</p>
             </div>
           </div>
 
@@ -53,7 +52,7 @@ export function Footer() {
             </div>
             <div>
               <p className="text-sm text-background/70 mb-1">{getTranslation(language, "email")}</p>
-              <p className="text-lg font-bold text-background">info@delotruckcenter.com</p>
+              <p className="text-lg font-bold text-background">delotruckcenter@gmail.com</p>
             </div>
           </div>
         </div>

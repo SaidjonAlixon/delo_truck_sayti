@@ -43,7 +43,7 @@ export function About() {
               />
             </div>
             <div className="absolute -bottom-6 -right-6 bg-accent p-6 rounded-xl shadow-lg">
-              <p className="text-4xl font-bold text-accent-foreground mb-1">15+</p>
+              <p className="text-4xl font-bold text-accent-foreground mb-1">5+</p>
               <p className="text-sm text-accent-foreground/90">{getTranslation(language, "yearsOfExcellence")}</p>
             </div>
           </div>
