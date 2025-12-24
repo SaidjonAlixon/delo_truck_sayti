@@ -25,8 +25,8 @@ const iconMap: { [key: string]: any } = {
   jumpstart: Battery,
 }
 
-// Extended service details with features, benefits, and process
-const serviceDetails: { [key: string]: {
+// Extended service details with features, benefits, and process (fallback)
+const defaultServiceDetails: { [key: string]: {
   features: string[]
   benefits: string[]
   process: string[]
@@ -477,6 +477,7 @@ export function ServicesDetailed() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedService, setSelectedService] = useState("")
   const [services, setServices] = useState(defaultServices)
+  const [serviceDetails, setServiceDetails] = useState<Record<string, any>>({})
   const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({})
   const observerRef = useRef<IntersectionObserver | null>(null)
 
@@ -503,16 +504,20 @@ export function ServicesDetailed() {
 
   useEffect(() => {
     loadServices()
+    loadServiceDetails()
     
     const handleUpdate = () => {
       loadServices()
+      loadServiceDetails()
     }
 
     window.addEventListener("servicesUpdated", handleUpdate)
+    window.addEventListener("serviceDetailsUpdated", handleUpdate)
     
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'servicesLastUpdated') {
+      if (e.key === 'servicesLastUpdated' || e.key === 'serviceDetailsLastUpdated') {
         loadServices()
+        loadServiceDetails()
       }
     }
     window.addEventListener("storage", handleStorageChange)
@@ -520,25 +525,38 @@ export function ServicesDetailed() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         loadServices()
+        loadServiceDetails()
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange)
     
-    window.addEventListener("focus", loadServices)
+    window.addEventListener("focus", () => {
+      loadServices()
+      loadServiceDetails()
+    })
     
     const storageCheckInterval = setInterval(() => {
-      const lastUpdated = localStorage.getItem('servicesLastUpdated')
-      if (lastUpdated) {
+      const servicesUpdated = localStorage.getItem('servicesLastUpdated')
+      const detailsUpdated = localStorage.getItem('serviceDetailsLastUpdated')
+      if (servicesUpdated) {
         const saved = sessionStorage.getItem('lastServicesCheck')
-        if (!saved || saved !== lastUpdated) {
-          sessionStorage.setItem('lastServicesCheck', lastUpdated)
+        if (!saved || saved !== servicesUpdated) {
+          sessionStorage.setItem('lastServicesCheck', servicesUpdated)
           loadServices()
+        }
+      }
+      if (detailsUpdated) {
+        const saved = sessionStorage.getItem('lastServiceDetailsCheck')
+        if (!saved || saved !== detailsUpdated) {
+          sessionStorage.setItem('lastServiceDetailsCheck', detailsUpdated)
+          loadServiceDetails()
         }
       }
     }, 1000)
     
     return () => {
       window.removeEventListener("servicesUpdated", handleUpdate)
+      window.removeEventListener("serviceDetailsUpdated", handleUpdate)
       window.removeEventListener("storage", handleStorageChange)
       document.removeEventListener("visibilitychange", handleVisibilityChange)
       window.removeEventListener("focus", loadServices)
@@ -581,6 +599,33 @@ export function ServicesDetailed() {
     }
   }
 
+  const loadServiceDetails = async () => {
+    try {
+      const response = await fetch('/api/service-details', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
+      const result = await response.json()
+      if (result.success && result.data.length > 0) {
+        const detailsMap: Record<string, any> = {}
+        result.data.forEach((detail: any) => {
+          detailsMap[detail.service_id] = {
+            features: Array.isArray(detail.features) ? detail.features : [],
+            benefits: Array.isArray(detail.benefits) ? detail.benefits : [],
+            process: Array.isArray(detail.process) ? detail.process : [],
+            estimatedTime: detail.estimated_time || '',
+            warranty: detail.warranty || '',
+          }
+        })
+        setServiceDetails(detailsMap)
+      }
+    } catch (error) {
+      console.error("Error loading service details:", error)
+    }
+  }
+
   const handleGetQuote = (serviceId: string) => {
     setSelectedService(serviceId)
     setIsModalOpen(true)
@@ -606,11 +651,16 @@ export function ServicesDetailed() {
         <div className="space-y-32">
           {services.map((service, index) => {
             const Icon = service.icon
-            const details = serviceDetails[service.serviceId] || {
+            // Get details from database, fallback to hardcoded if not available
+            const dbDetails = serviceDetails[service.serviceId]
+            const hardcodedDetails = defaultServiceDetails[service.serviceId] || {
               features: [],
               benefits: [],
               process: [],
+              estimatedTime: '',
+              warranty: '',
             }
+            const details = dbDetails || hardcodedDetails
             const isEven = index % 2 === 0
             
             // Check if sale is active

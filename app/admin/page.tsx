@@ -92,8 +92,9 @@ export default function AdminPanel() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="services">Services</TabsTrigger>
+            <TabsTrigger value="services2">Services 2</TabsTrigger>
             <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="faq">FAQ</TabsTrigger>
@@ -103,6 +104,10 @@ export default function AdminPanel() {
 
           <TabsContent value="services">
             <ServicesManagement />
+          </TabsContent>
+
+          <TabsContent value="services2">
+            <ServicesDetailsManagement />
           </TabsContent>
 
           <TabsContent value="testimonials">
@@ -1018,6 +1023,386 @@ function ContentManagement() {
         )}
       </div>
     </Card>
+  )
+}
+
+function ServicesDetailsManagement() {
+  const [services, setServices] = useState<any[]>([])
+  const [serviceDetails, setServiceDetails] = useState<Record<string, any>>({})
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadServices()
+    loadServiceDetails()
+    
+    const handleUpdate = () => {
+      loadServiceDetails()
+    }
+    window.addEventListener("serviceDetailsUpdated", handleUpdate)
+    
+    return () => {
+      window.removeEventListener("serviceDetailsUpdated", handleUpdate)
+    }
+  }, [])
+
+  const loadServices = async () => {
+    try {
+      const response = await fetch('/api/services')
+      const result = await response.json()
+      if (result.success) {
+        setServices(result.data || [])
+      }
+    } catch (error) {
+      console.error('Error loading services:', error)
+    }
+  }
+
+  const loadServiceDetails = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/service-details')
+      const result = await response.json()
+      if (result.success) {
+        const detailsMap: Record<string, any> = {}
+        result.data.forEach((detail: any) => {
+          detailsMap[detail.service_id] = {
+            id: detail.id,
+            service_id: detail.service_id,
+            features: Array.isArray(detail.features) ? detail.features : [],
+            benefits: Array.isArray(detail.benefits) ? detail.benefits : [],
+            process: Array.isArray(detail.process) ? detail.process : [],
+            estimated_time: detail.estimated_time || '',
+            warranty: detail.warranty || '',
+          }
+        })
+        setServiceDetails(detailsMap)
+      }
+    } catch (error) {
+      console.error('Error loading service details:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = async (serviceId: string, detailData: any) => {
+    try {
+      const existingDetail = serviceDetails[serviceId]
+      const method = existingDetail?.id ? 'PUT' : 'POST'
+      const url = '/api/service-details'
+      
+      const requestBody = existingDetail?.id
+        ? { id: existingDetail.id, ...detailData }
+        : detailData
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        await loadServiceDetails()
+        setEditingServiceId(null)
+        window.dispatchEvent(new Event("serviceDetailsUpdated"))
+        localStorage.setItem('serviceDetailsLastUpdated', Date.now().toString())
+        alert('Service details saved successfully! Changes will appear on the website.')
+      } else {
+        alert('Error: ' + (result.message || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error saving service details:', error)
+      alert('Error saving service details')
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Service Details Management</h2>
+        <p className="text-muted-foreground">Loading...</p>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold">Service Details Management</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Manage detailed information (Features, Benefits, Process, Estimated Time, Warranty) for each service
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        {services.map((service) => {
+          const detail = serviceDetails[service.service_id] || {
+            service_id: service.service_id,
+            features: [],
+            benefits: [],
+            process: [],
+            estimated_time: '',
+            warranty: '',
+          }
+          const isEditing = editingServiceId === service.service_id
+
+          return (
+            <Card key={service.id} className="p-6 border-2">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-foreground">{service.title || service.title_key}</h3>
+                  <p className="text-sm text-muted-foreground">Service ID: {service.service_id}</p>
+                </div>
+                <Button
+                  variant={isEditing ? "outline" : "default"}
+                  onClick={() => setEditingServiceId(isEditing ? null : service.service_id)}
+                >
+                  {isEditing ? "Cancel" : <><Edit className="w-4 h-4 mr-2" />Edit Details</>}
+                </Button>
+              </div>
+
+              {isEditing ? (
+                <ServiceDetailsForm
+                  serviceId={service.service_id}
+                  initialData={detail}
+                  onSave={(data) => handleSave(service.service_id, data)}
+                  onCancel={() => setEditingServiceId(null)}
+                />
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-2 text-foreground">Key Features:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      {detail.features.length > 0 ? (
+                        detail.features.map((feature: string, idx: number) => (
+                          <li key={idx}>{feature}</li>
+                        ))
+                      ) : (
+                        <li className="text-muted-foreground/50">No features added</li>
+                      )}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-foreground">Benefits:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      {detail.benefits.length > 0 ? (
+                        detail.benefits.map((benefit: string, idx: number) => (
+                          <li key={idx}>{benefit}</li>
+                        ))
+                      ) : (
+                        <li className="text-muted-foreground/50">No benefits added</li>
+                      )}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-foreground">Our Process:</h4>
+                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                      {detail.process.length > 0 ? (
+                        detail.process.map((step: string, idx: number) => (
+                          <li key={idx}>{step}</li>
+                        ))
+                      ) : (
+                        <li className="text-muted-foreground/50">No process steps added</li>
+                      )}
+                    </ol>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold mb-1 text-foreground">Estimated Time:</h4>
+                      <p className="text-muted-foreground">{detail.estimated_time || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-1 text-foreground">Warranty:</h4>
+                      <p className="text-muted-foreground">{detail.warranty || 'Not set'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+    </Card>
+  )
+}
+
+function ServiceDetailsForm({ 
+  serviceId, 
+  initialData, 
+  onSave, 
+  onCancel 
+}: { 
+  serviceId: string
+  initialData: any
+  onSave: (data: any) => void
+  onCancel: () => void
+}) {
+  const [formData, setFormData] = useState({
+    service_id: serviceId,
+    features: initialData.features || [],
+    benefits: initialData.benefits || [],
+    process: initialData.process || [],
+    estimated_time: initialData.estimated_time || '',
+    warranty: initialData.warranty || '',
+  })
+
+  useEffect(() => {
+    setFormData({
+      service_id: serviceId,
+      features: initialData.features || [],
+      benefits: initialData.benefits || [],
+      process: initialData.process || [],
+      estimated_time: initialData.estimated_time || '',
+      warranty: initialData.warranty || '',
+    })
+  }, [initialData, serviceId])
+
+  const addItem = (field: 'features' | 'benefits' | 'process') => {
+    setFormData({
+      ...formData,
+      [field]: [...formData[field], '']
+    })
+  }
+
+  const updateItem = (field: 'features' | 'benefits' | 'process', index: number, value: string) => {
+    const newArray = [...formData[field]]
+    newArray[index] = value
+    setFormData({
+      ...formData,
+      [field]: newArray
+    })
+  }
+
+  const removeItem = (field: 'features' | 'benefits' | 'process', index: number) => {
+    const newArray = formData[field].filter((_: any, i: number) => i !== index)
+    setFormData({
+      ...formData,
+      [field]: newArray
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Features */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <label className="block text-sm font-semibold text-foreground">Key Features</label>
+          <Button size="sm" variant="outline" onClick={() => addItem('features')}>
+            <Plus className="w-4 h-4 mr-1" />Add Feature
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {formData.features.map((feature: string, index: number) => (
+            <div key={index} className="flex gap-2">
+              <input
+                type="text"
+                value={feature}
+                onChange={(e) => updateItem('features', index, e.target.value)}
+                className="flex-1 px-3 py-2 border rounded-lg bg-background text-foreground"
+                placeholder="Enter feature"
+              />
+              <Button size="sm" variant="destructive" onClick={() => removeItem('features', index)}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+          {formData.features.length === 0 && (
+            <p className="text-sm text-muted-foreground">No features added. Click "Add Feature" to add one.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Benefits */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <label className="block text-sm font-semibold text-foreground">Benefits</label>
+          <Button size="sm" variant="outline" onClick={() => addItem('benefits')}>
+            <Plus className="w-4 h-4 mr-1" />Add Benefit
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {formData.benefits.map((benefit: string, index: number) => (
+            <div key={index} className="flex gap-2">
+              <input
+                type="text"
+                value={benefit}
+                onChange={(e) => updateItem('benefits', index, e.target.value)}
+                className="flex-1 px-3 py-2 border rounded-lg bg-background text-foreground"
+                placeholder="Enter benefit"
+              />
+              <Button size="sm" variant="destructive" onClick={() => removeItem('benefits', index)}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+          {formData.benefits.length === 0 && (
+            <p className="text-sm text-muted-foreground">No benefits added. Click "Add Benefit" to add one.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Process */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <label className="block text-sm font-semibold text-foreground">Our Process (Steps)</label>
+          <Button size="sm" variant="outline" onClick={() => addItem('process')}>
+            <Plus className="w-4 h-4 mr-1" />Add Step
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {formData.process.map((step: string, index: number) => (
+            <div key={index} className="flex gap-2">
+              <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                {index + 1}
+              </div>
+              <input
+                type="text"
+                value={step}
+                onChange={(e) => updateItem('process', index, e.target.value)}
+                className="flex-1 px-3 py-2 border rounded-lg bg-background text-foreground"
+                placeholder="Enter process step"
+              />
+              <Button size="sm" variant="destructive" onClick={() => removeItem('process', index)}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+          {formData.process.length === 0 && (
+            <p className="text-sm text-muted-foreground">No process steps added. Click "Add Step" to add one.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Estimated Time & Warranty */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-foreground">Estimated Time</label>
+          <input
+            type="text"
+            value={formData.estimated_time}
+            onChange={(e) => setFormData({ ...formData, estimated_time: e.target.value })}
+            className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
+            placeholder="e.g., 30-60 minutes"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-foreground">Warranty</label>
+          <input
+            type="text"
+            value={formData.warranty}
+            onChange={(e) => setFormData({ ...formData, warranty: e.target.value })}
+            className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
+            placeholder="e.g., 90 days on diagnostic services"
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-2 pt-4">
+        <Button onClick={() => onSave(formData)}>Save</Button>
+        <Button variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
+    </div>
   )
 }
 

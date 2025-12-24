@@ -94,6 +94,24 @@ export async function initDatabase() {
       )
     `)
 
+    // Drop and recreate service_details table to ensure correct schema
+    await pool.query(`DROP TABLE IF EXISTS service_details CASCADE`)
+    
+    // Create service_details table for managing detailed service information
+    await pool.query(`
+      CREATE TABLE service_details (
+        id SERIAL PRIMARY KEY,
+        service_id VARCHAR(255) UNIQUE NOT NULL,
+        features TEXT[] DEFAULT '{}',
+        benefits TEXT[] DEFAULT '{}',
+        process TEXT[] DEFAULT '{}',
+        estimated_time VARCHAR(255),
+        warranty TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
     // Insert default settings if not exists
     await pool.query(`
       INSERT INTO settings (setting_key, setting_value)
@@ -177,6 +195,141 @@ export async function initDatabase() {
            VALUES ($1, $2, $3, $4, $5, $6)
            ON CONFLICT (service_id) DO NOTHING`,
           [service.service_id, service.title_key, service.desc_key, service.price, service.price_type, service.image]
+        )
+      }
+    }
+
+    // Insert default service details if table is empty
+    const serviceDetailsCount = await pool.query('SELECT COUNT(*) FROM service_details')
+    if (parseInt(serviceDetailsCount.rows[0].count) === 0) {
+      const defaultServiceDetails = [
+        {
+          service_id: 'diagnostics',
+          features: JSON.stringify(["Advanced computer diagnostics", "Engine code reading and clearing", "Real-time data monitoring", "Performance analysis"]),
+          benefits: JSON.stringify(["Quick problem identification", "Prevents costly repairs", "Improves fuel efficiency", "Extends vehicle lifespan"]),
+          process: JSON.stringify(["Connect diagnostic equipment", "Run comprehensive system scan", "Analyze error codes and data", "Provide detailed report and recommendations"]),
+          estimated_time: "30-60 minutes",
+          warranty: "90 days on diagnostic services"
+        },
+        {
+          service_id: 'tire',
+          features: JSON.stringify(["Tire installation and replacement", "Wheel balancing and alignment", "Tire rotation services", "Pressure monitoring system"]),
+          benefits: JSON.stringify(["Improved safety and handling", "Extended tire life", "Better fuel economy", "Reduced road noise"]),
+          process: JSON.stringify(["Inspect current tire condition", "Remove and mount new tires", "Balance wheels for smooth ride", "Test drive and final inspection"]),
+          estimated_time: "45-90 minutes",
+          warranty: "12 months on labor"
+        },
+        {
+          service_id: 'oil',
+          features: JSON.stringify(["Full synthetic and conventional oil", "Oil filter replacement", "Fluid level checks", "Multi-point inspection"]),
+          benefits: JSON.stringify(["Extended engine life", "Improved performance", "Better fuel efficiency", "Reduced engine wear"]),
+          process: JSON.stringify(["Drain old oil completely", "Replace oil filter", "Add fresh premium oil", "Check all fluid levels"]),
+          estimated_time: "30-45 minutes",
+          warranty: "6 months"
+        },
+        {
+          service_id: 'suspension',
+          features: JSON.stringify(["Shock and strut replacement", "Spring inspection and repair", "Alignment services", "Steering component repair"]),
+          benefits: JSON.stringify(["Smoother ride quality", "Better vehicle control", "Reduced tire wear", "Improved safety"]),
+          process: JSON.stringify(["Comprehensive suspension inspection", "Identify worn components", "Replace or repair as needed", "Align wheels and test drive"]),
+          estimated_time: "2-4 hours",
+          warranty: "24 months on parts and labor"
+        },
+        {
+          service_id: 'transmission',
+          features: JSON.stringify(["Transmission fluid service", "Complete rebuild services", "Torque converter repair", "Electronic transmission control"]),
+          benefits: JSON.stringify(["Smooth shifting performance", "Extended transmission life", "Prevents breakdowns", "Maintains resale value"]),
+          process: JSON.stringify(["Diagnose transmission issues", "Drain and replace fluid", "Repair or replace components", "Test and verify operation"]),
+          estimated_time: "4-8 hours",
+          warranty: "36 months on rebuilds"
+        },
+        {
+          service_id: 'dot',
+          features: JSON.stringify(["DOT annual inspections", "Safety compliance checks", "Emissions testing", "Documentation and certification"]),
+          benefits: JSON.stringify(["Legal compliance", "Safety assurance", "Fleet management support", "Peace of mind"]),
+          process: JSON.stringify(["Complete visual inspection", "Test all safety systems", "Check emissions compliance", "Issue official certification"]),
+          estimated_time: "60-90 minutes",
+          warranty: "Inspection valid 12 months"
+        },
+        {
+          service_id: 'roadside',
+          features: JSON.stringify(["24/7 emergency service", "Tire changes on-site", "Fuel delivery", "Jump starts and battery service"]),
+          benefits: JSON.stringify(["Minimize downtime", "Quick response times", "Expert assistance anywhere", "Cost-effective solutions"]),
+          process: JSON.stringify(["Receive emergency call", "Dispatch service vehicle", "Arrive at location", "Complete repair or tow as needed"]),
+          estimated_time: "30-60 minutes response",
+          warranty: "Service guarantee"
+        },
+        {
+          service_id: 'ac',
+          features: JSON.stringify(["AC system diagnosis", "Refrigerant recharge", "Compressor repair/replacement", "Cabin filter replacement"]),
+          benefits: JSON.stringify(["Comfortable cabin temperature", "Improved air quality", "Better driver focus", "System efficiency"]),
+          process: JSON.stringify(["Test AC system performance", "Check for leaks", "Recharge or repair system", "Verify cool air output"]),
+          estimated_time: "1-3 hours",
+          warranty: "12 months on repairs"
+        },
+        {
+          service_id: 'brake',
+          features: JSON.stringify(["Brake pad and shoe replacement", "Rotor and drum resurfacing", "Brake fluid flush", "ABS system service"]),
+          benefits: JSON.stringify(["Optimal stopping power", "Increased safety", "Smooth braking", "Reduced noise"]),
+          process: JSON.stringify(["Inspect brake system", "Measure brake components", "Replace or resurface as needed", "Test brake performance"]),
+          estimated_time: "2-4 hours",
+          warranty: "18 months on parts"
+        },
+        {
+          service_id: 'pm',
+          features: JSON.stringify(["Preventive maintenance checks", "Fluid top-offs", "Component inspections", "Maintenance scheduling"]),
+          benefits: JSON.stringify(["Prevents breakdowns", "Reduces repair costs", "Extends vehicle life", "Maintains warranty"]),
+          process: JSON.stringify(["Comprehensive vehicle inspection", "Service all fluid systems", "Check belts and hoses", "Document findings and recommendations"]),
+          estimated_time: "60-90 minutes",
+          warranty: "Service coverage"
+        },
+        {
+          service_id: 'carb',
+          features: JSON.stringify(["CARB inspection services", "Emissions compliance verification", "Documentation assistance", "Renewal support"]),
+          benefits: JSON.stringify(["California compliance", "Legal operation", "Environmental responsibility", "Fleet compliance"]),
+          process: JSON.stringify(["Review compliance requirements", "Perform necessary inspections", "Complete documentation", "Submit to CARB"]),
+          estimated_time: "90-120 minutes",
+          warranty: "Inspection certification"
+        },
+        {
+          service_id: 'def',
+          features: JSON.stringify(["DEF system service", "Tank cleaning and repair", "Injector service", "Sensor replacement"]),
+          benefits: JSON.stringify(["Emission compliance", "Improved performance", "Reduced downtime", "System reliability"]),
+          process: JSON.stringify(["Diagnose DEF system", "Clean or repair components", "Replace sensors if needed", "Test system operation"]),
+          estimated_time: "2-3 hours",
+          warranty: "12 months on repairs"
+        },
+        {
+          service_id: 'dpf',
+          features: JSON.stringify(["DPF cleaning services", "Regeneration support", "Filter replacement", "System diagnostics"]),
+          benefits: JSON.stringify(["Restored engine power", "Better fuel economy", "Emission compliance", "Extended filter life"]),
+          process: JSON.stringify(["Inspect DPF condition", "Perform cleaning or regeneration", "Test system performance", "Verify emissions compliance"]),
+          estimated_time: "3-5 hours",
+          warranty: "6 months on cleaning"
+        },
+        {
+          service_id: 'jumpstart',
+          features: JSON.stringify(["Battery testing", "Jump start service", "Battery replacement", "Charging system check"]),
+          benefits: JSON.stringify(["Quick vehicle recovery", "Prevents being stranded", "Identifies battery issues", "Reliable starting"]),
+          process: JSON.stringify(["Test battery voltage", "Jump start if needed", "Check charging system", "Replace battery if necessary"]),
+          estimated_time: "15-30 minutes",
+          warranty: "36 months on batteries"
+        },
+      ]
+      
+      for (const detail of defaultServiceDetails) {
+        await pool.query(
+          `INSERT INTO service_details (service_id, features, benefits, process, estimated_time, warranty)
+           VALUES ($1, $2::text[], $3::text[], $4::text[], $5, $6)
+           ON CONFLICT (service_id) DO NOTHING`,
+          [
+            detail.service_id, 
+            JSON.parse(detail.features) || [],
+            JSON.parse(detail.benefits) || [],
+            JSON.parse(detail.process) || [],
+            detail.estimated_time, 
+            detail.warranty
+          ]
         )
       }
     }
