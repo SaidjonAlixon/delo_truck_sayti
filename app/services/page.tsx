@@ -1,7 +1,7 @@
 "use client"
 
 import { Header } from "@/components/header"
-import { Services } from "@/components/services"
+import { ServicesDetailed } from "@/components/services-detailed"
 import { SiteFooter } from "@/components/site-footer"
 import { Snow } from "@/components/snow"
 import { LanguageProvider } from "@/lib/language-context"
@@ -17,7 +17,7 @@ export default function ServicesPage() {
             <Snow />
             <Header />
             <div className="pt-20">
-              <Services />
+              <ServicesDetailed />
             </div>
             <SiteFooter />
           </main>

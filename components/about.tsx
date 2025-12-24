@@ -1,6 +1,6 @@
 "use client"
 
-import { Shield, Award, Users, Clock, Truck, CheckCircle, Wrench, Star, Building2, Target, Zap, Heart, HelpCircle } from "lucide-react"
+import { Shield, Award, Users, Clock, Truck, CheckCircle, Wrench, Star, Building2, Target, Zap, Heart, HelpCircle, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { getTranslation } from "@/lib/translations"
 import { useContent } from "@/lib/use-content"
@@ -15,7 +15,11 @@ interface FAQItem {
   display_order: number
 }
 
-export function About() {
+interface AboutProps {
+  simple?: boolean
+}
+
+export function About({ simple = false }: AboutProps) {
   const { language } = useLanguage()
   const { getTranslation: getContent } = useContent()
   const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({})
@@ -139,6 +143,145 @@ export function About() {
     "/services/transmission.jpg",
   ]
 
+  // Simple version for homepage
+  if (simple) {
+    return (
+      <section id="about" className="relative py-24 bg-gradient-to-b from-background via-muted/20 to-background overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          {/* Section Header */}
+          <div 
+            id="about-simple-header"
+            data-animate
+            className={`text-center mb-16 transition-all duration-1000 ${
+              isVisible["about-simple-header"] ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"
+            }`}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6 backdrop-blur-sm border border-primary/20">
+              <span className="text-sm font-semibold text-primary">{getContent("aboutUs")}</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-gradient-to-r from-foreground via-primary/90 to-foreground bg-clip-text text-transparent leading-tight">
+              Your Trusted Partner in Commercial Truck Excellence
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto rounded-full" />
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Image Section */}
+            <div 
+              id="about-simple-image"
+              data-animate
+              className={`relative group transition-all duration-1000 ${
+                isVisible["about-simple-image"] ? "opacity-100 translate-x-0 scale-100" : "opacity-0 -translate-x-10 scale-95"
+              }`}
+            >
+              <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 shadow-2xl border border-primary/10">
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
+                
+                <img
+                  src="/professional-truck-mechanics-working-in-modern-ser.jpg"
+                  alt="Delo Truck Center - Professional Truck Service"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                
+                {/* Floating badge */}
+                <div className="absolute bottom-8 left-8 z-20 bg-accent/95 backdrop-blur-md p-6 rounded-2xl shadow-2xl border-2 border-white/20 transform group-hover:scale-105 group-hover:rotate-1 transition-all duration-300">
+                  <p className="text-5xl font-black text-accent-foreground mb-2 leading-none">5+</p>
+                  <p className="text-sm font-semibold text-accent-foreground/90 uppercase tracking-wide">
+                    {getContent("yearsOfExcellence")}
+                  </p>
+                </div>
+
+                {/* Decorative corner element */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/30 to-transparent rounded-bl-full" />
+              </div>
+            </div>
+
+            {/* Content Section */}
+            <div 
+              id="about-simple-content"
+              data-animate
+              className={`space-y-8 transition-all duration-1000 ${
+                isVisible["about-simple-content"] ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+              }`}
+              style={{ transitionDelay: "200ms" }}
+            >
+              {/* Main Description */}
+              <div className="space-y-6">
+                <div className="inline-block px-4 py-2 bg-primary/10 rounded-lg mb-4">
+                  <p className="text-sm font-semibold text-primary uppercase tracking-wider">Who We Are</p>
+                </div>
+                
+                <h3 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  Excellence in Every Service, Trust in Every Repair
+                </h3>
+                
+                <div className="space-y-4">
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    Delo Truck Center LLC has been at the forefront of commercial trucking services for over 5 years. We combine cutting-edge technology with expert craftsmanship to deliver unparalleled repair and maintenance solutions.
+                  </p>
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    Our modern facility, spanning thousands of square feet, is equipped with the latest diagnostic equipment and staffed by ASE-certified technicians dedicated to keeping your fleet operating at peak performance.
+                  </p>
+                </div>
+              </div>
+
+              {/* Features Grid with enhanced design */}
+              <div className="grid sm:grid-cols-2 gap-4 pt-6">
+                {features.map((feature, index) => {
+                  const Icon = feature.icon
+                  return (
+                    <Card
+                      key={index}
+                      id={`about-simple-feature-${index}`}
+                      data-animate
+                      className={`group p-5 bg-card/50 backdrop-blur-sm border-2 hover:border-primary/50 transition-all duration-500 hover:shadow-xl hover:-translate-y-2 cursor-pointer ${
+                        isVisible[`about-simple-feature-${index}`] 
+                          ? "opacity-100 translate-y-0" 
+                          : "opacity-0 translate-y-5"
+                      }`}
+                      style={{ transitionDelay: `${400 + index * 100}ms` }}
+                    >
+                      <div className="flex gap-4 items-start">
+                        <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-primary/20">
+                          <Icon className="w-7 h-7 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-base mb-2 text-foreground group-hover:text-primary transition-colors">
+                            {getContent(feature.titleKey)}
+                          </h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                            {getContent(feature.descKey)}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  )
+                })}
+              </div>
+
+              {/* Call to action hint */}
+              <div className="pt-4">
+                <a 
+                  href="/about" 
+                  className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all duration-300 group"
+                >
+                  <span>Learn More About Us</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Full version for /about page
   return (
     <div className="bg-background">
       {/* Hero Section */}
@@ -194,9 +337,9 @@ export function About() {
       </section>
 
       {/* Main About Section */}
-    <section id="about" className="py-20 bg-background">
+      <section id="about" className="py-20 bg-background">
         <div className="container mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div 
               id="about-image"
               data-animate
@@ -205,16 +348,16 @@ export function About() {
               }`}
             >
               <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-2xl">
-              <img
-                src="/professional-truck-mechanics-working-in-modern-ser.jpg"
-                alt="About Delo Truck Center"
+                <img
+                  src="/professional-truck-mechanics-working-in-modern-ser.jpg"
+                  alt="About Delo Truck Center"
                   className="w-full h-full object-cover hover:scale-110 transition-transform duration-700"
-              />
-            </div>
+                />
+              </div>
               <div className="absolute -bottom-6 -right-6 bg-accent p-6 rounded-xl shadow-2xl transform hover:scale-105 transition-transform duration-300">
                 <p className="text-4xl font-bold text-accent-foreground mb-1">5+</p>
                 <p className="text-sm text-accent-foreground/90">{getContent("yearsOfExcellence")}</p>
-          </div>
+              </div>
             </div>
 
             <div 
@@ -226,9 +369,9 @@ export function About() {
               style={{ transitionDelay: "200ms" }}
             >
               <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-balance text-foreground">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-balance text-foreground">
                   Serving the Commercial Trucking Industry with Excellence
-            </h2>
+                </h2>
                 <p className="text-lg text-foreground leading-relaxed">
                   {getContent("aboutDescription1")}
                 </p>
@@ -240,33 +383,33 @@ export function About() {
                 </p>
               </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 pt-4">
-              {features.map((feature, index) => {
-                const Icon = feature.icon
-                return (
+              <div className="grid sm:grid-cols-2 gap-4 pt-4">
+                {features.map((feature, index) => {
+                  const Icon = feature.icon
+                  return (
                     <div 
                       key={index}
                       className="flex gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors duration-300"
                     >
                       <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <Icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1 text-foreground">
+                        <Icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-1 text-foreground">
                           {getContent(feature.titleKey)}
-                      </h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        </h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
                           {getContent(feature.descKey)}
-                      </p>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
       {/* Mission & Vision Section */}
       <section className="py-20 bg-muted/30">
