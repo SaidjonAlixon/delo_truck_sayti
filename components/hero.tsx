@@ -19,6 +19,7 @@ export function Hero() {
   const { getTranslation: getContent } = useContent()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   const slides: HeroSlide[] = useMemo(
     () => [
@@ -42,15 +43,29 @@ export function Hero() {
   )
 
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length)
+    setIsAnimating(true)
+    setTimeout(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+      setTimeout(() => setIsAnimating(false), 50)
+    }, 400)
   }, [slides.length])
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+    setIsAnimating(true)
+    setTimeout(() => {
+      setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+      setTimeout(() => setIsAnimating(false), 50)
+    }, 400)
   }, [slides.length])
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index)
+    if (index !== currentSlide) {
+      setIsAnimating(true)
+      setTimeout(() => {
+        setCurrentSlide(index)
+        setTimeout(() => setIsAnimating(false), 50)
+      }, 400)
+    }
   }
 
   // Auto-slide every 5 seconds
@@ -90,18 +105,52 @@ export function Hero() {
       <div className="relative z-10 h-full flex items-center justify-center">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center space-y-6">
-            {/* Slide Content */}
-            <div className="space-y-6 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-lg">
+            {/* Slide Content with smooth animations */}
+            <div 
+              key={currentSlide}
+              className={`space-y-6 transition-all duration-500 ease-in-out ${
+                isAnimating 
+                  ? "opacity-0 translate-y-10 scale-98" 
+                  : "opacity-100 translate-y-0 scale-100"
+              }`}
+            >
+              <h1 
+                className={`text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-lg transition-all duration-500 ease-out ${
+                  isAnimating 
+                    ? "opacity-0 translate-y-6 blur-sm" 
+                    : "opacity-100 translate-y-0 blur-0"
+                }`}
+                style={{ 
+                  transitionDelay: isAnimating ? "0ms" : "100ms" 
+                }}
+              >
                 {slides[currentSlide].title}
               </h1>
-              <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto drop-shadow-md">
+              <p 
+                className={`text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto drop-shadow-md transition-all duration-500 ease-out ${
+                  isAnimating 
+                    ? "opacity-0 translate-y-6 blur-sm" 
+                    : "opacity-100 translate-y-0 blur-0"
+                }`}
+                style={{ 
+                  transitionDelay: isAnimating ? "0ms" : "200ms" 
+                }}
+              >
                 {slides[currentSlide].description}
               </p>
-              <div className="pt-4">
+              <div 
+                className={`pt-4 transition-all duration-500 ease-out ${
+                  isAnimating 
+                    ? "opacity-0 translate-y-6 scale-95" 
+                    : "opacity-100 translate-y-0 scale-100"
+                }`}
+                style={{ 
+                  transitionDelay: isAnimating ? "0ms" : "300ms" 
+                }}
+              >
                 <Button
                   size="lg"
-                  className="bg-red-600 hover:bg-red-700 text-white text-lg h-14 px-8 uppercase font-semibold"
+                  className="bg-red-600 hover:bg-red-700 text-white text-lg h-14 px-8 uppercase font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                   onClick={() => setIsQuoteModalOpen(true)}
                 >
                   {getContent("contactUsToday")}

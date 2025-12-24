@@ -69,7 +69,7 @@ export default function AdminPanel() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground">Yuklanmoqda...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -82,23 +82,23 @@ export default function AdminPanel() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Admin Panel</h1>
-            <p className="text-muted-foreground">Sayt ma'lumotlarini boshqarish</p>
+            <p className="text-muted-foreground">Manage website content</p>
           </div>
           <Button variant="outline" onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />
-            Chiqish
+            Logout
           </Button>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="services">Xizmatlar</TabsTrigger>
-            <TabsTrigger value="testimonials">Izohlar</TabsTrigger>
-            <TabsTrigger value="content">Kontent</TabsTrigger>
+            <TabsTrigger value="services">Services</TabsTrigger>
+            <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="faq">FAQ</TabsTrigger>
-            <TabsTrigger value="timezone">Vaqt</TabsTrigger>
-            <TabsTrigger value="settings">Sozlamalar</TabsTrigger>
+            <TabsTrigger value="timezone">Time</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services">
@@ -213,7 +213,7 @@ function ServicesManagement() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("Bu xizmatni o'chirishni xohlaysizmi?")) {
+    if (confirm("Are you sure you want to delete this service?")) {
       try {
         const response = await fetch(`/api/services?id=${id}`, {
           method: 'DELETE',
@@ -235,10 +235,10 @@ function ServicesManagement() {
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Xizmatlar Boshqaruvi</h2>
+        <h2 className="text-2xl font-bold">Services Management</h2>
         <Button onClick={() => setIsAdding(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Yangi Xizmat
+          New Service
         </Button>
       </div>
 
@@ -363,10 +363,10 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
 
   return (
     <Card className="p-6 mb-6">
-      <h3 className="text-xl font-bold mb-4">{initialData ? "Xizmatni Tahrirlash" : "Yangi Xizmat"}</h3>
+      <h3 className="text-xl font-bold mb-4">{initialData ? "Edit Service" : "New Service"}</h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Xizmat nomi (to'g'ridan-to'g'ri matn) *</label>
+          <label className="block text-sm font-medium mb-2">Service Name (direct text) *</label>
           <input
             type="text"
             value={formData.title || ""}
@@ -375,10 +375,10 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
             placeholder="Computer Diagnostics"
             required
           />
-          <p className="text-xs text-muted-foreground mt-1">Bu matn saytda ko'rinadi</p>
+          <p className="text-xs text-muted-foreground mt-1">This text will appear on the website</p>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Xizmat izohi (to'g'ridan-to'g'ri matn) *</label>
+          <label className="block text-sm font-medium mb-2">Service Description (direct text) *</label>
           <textarea
             value={formData.description || ""}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -386,7 +386,7 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
             placeholder="Professional computer diagnostics for your vehicle"
             required
           />
-          <p className="text-xs text-muted-foreground mt-1">Bu matn saytda ko'rinadi</p>
+          <p className="text-xs text-muted-foreground mt-1">This text will appear on the website</p>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Service ID</label>
@@ -399,17 +399,17 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Narx</label>
+          <label className="block text-sm font-medium mb-2">Price</label>
           <input
             type="text"
             value={formData.price || ""}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            placeholder="$150 (bo'sh qoldirish mumkin)"
+            placeholder="$150 (can be left empty)"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Narx turi</label>
+          <label className="block text-sm font-medium mb-2">Price Type</label>
           <select
             value={formData.priceType}
             onChange={(e) => setFormData({ ...formData, priceType: e.target.value })}
@@ -421,24 +421,24 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Rasm manzili</label>
+          <label className="block text-sm font-medium mb-2">Image URL</label>
           <input
             type="url"
             value={formData.image}
             onChange={(e) => setFormData({ ...formData, image: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            placeholder="https://example.com/image.jpg yoki /services/diagnostics.jpg"
+            placeholder="https://example.com/image.jpg or /services/diagnostics.jpg"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            To'liq rasm URL'i (https://example.com/image.jpg, .png, .webp) yoki mahalliy fayl yo'li (/services/image.jpg)
+            Full image URL (https://example.com/image.jpg, .png, .webp) or local file path (/services/image.jpg)
           </p>
           <p className="text-xs text-amber-600 mt-1">
-            ⚠️ Eslatma: Blog post URL'i emas, to'g'ridan-to'g'ri rasm faylining URL'i kerak! 
-            Rasmga o'ng klik qilib "Copy image address" yoki "Copy image URL" tanlang.
+            ⚠️ Note: Not a blog post URL, a direct image file URL is needed! 
+            Right-click on the image and select "Copy image address" or "Copy image URL".
           </p>
           {formData.image && (
             <div className="mt-2">
-              <p className="text-xs text-muted-foreground mb-1">Rasm ko'rinishi:</p>
+              <p className="text-xs text-muted-foreground mb-1">Image Preview:</p>
               <div className="w-full h-48 border rounded-lg overflow-hidden bg-muted flex items-center justify-center relative">
                 <img
                   src={formData.image}
@@ -451,7 +451,7 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
                     if (parent && !parent.querySelector('.error-message')) {
                       const errorDiv = document.createElement('div')
                       errorDiv.className = 'error-message text-xs text-red-500 p-2 text-center'
-                      errorDiv.innerHTML = '❌ Rasm yuklanmadi!<br/>URL\'ni tekshiring.<br/>Rasm URL\'i to\'g\'ri bo\'lishi kerak (.jpg, .png, .webp)'
+                      errorDiv.innerHTML = '❌ Image failed to load!<br/>Please check the URL.<br/>Image URL must be valid (.jpg, .png, .webp)'
                       parent.appendChild(errorDiv)
                     }
                   }}
@@ -467,12 +467,12 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
           )}
         </div>
         
-        {/* Aksiya sozlamalari */}
+        {/* Promotion settings */}
         <div className="border-t pt-4 mt-4">
-          <h4 className="text-lg font-semibold mb-4">Aksiya sozlamalari (ixtiyoriy)</h4>
+          <h4 className="text-lg font-semibold mb-4">Promotion Settings (optional)</h4>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Chegirma foizi (%)</label>
+              <label className="block text-sm font-medium mb-2">Discount Percentage (%)</label>
               <input
                 type="number"
                 min="0"
@@ -480,33 +480,33 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
                 value={formData.discountPercent || ""}
                 onChange={(e) => setFormData({ ...formData, discountPercent: e.target.value ? parseInt(e.target.value) : null })}
                 className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-                placeholder="Masalan: 20"
+                placeholder="e.g., 20"
               />
-              <p className="text-xs text-muted-foreground mt-1">Aksiya chegirma foizi (0-100%)</p>
+              <p className="text-xs text-muted-foreground mt-1">Promotion discount percentage (0-100%)</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Aksiya boshlanish vaqti</label>
+              <label className="block text-sm font-medium mb-2">Promotion Start Time</label>
               <input
                 type="datetime-local"
                 value={formData.saleStartDate || ""}
                 onChange={(e) => setFormData({ ...formData, saleStartDate: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
               />
-              <p className="text-xs text-muted-foreground mt-1">Aksiya qachon boshlanishi</p>
+              <p className="text-xs text-muted-foreground mt-1">When the promotion starts</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Aksiya tugash vaqti</label>
+              <label className="block text-sm font-medium mb-2">Promotion End Time</label>
               <input
                 type="datetime-local"
                 value={formData.saleEndDate || ""}
                 onChange={(e) => setFormData({ ...formData, saleEndDate: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
               />
-              <p className="text-xs text-muted-foreground mt-1">Aksiya qachon tugashi (bu vaqtgacha countdown timer ishlaydi)</p>
+              <p className="text-xs text-muted-foreground mt-1">When the promotion ends (countdown timer will run until this time)</p>
             </div>
             {formData.discountPercent && formData.price && formData.priceType !== "call" && (
               <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Chegirma narx:</p>
+                <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Discounted Price:</p>
                 <p className="text-lg font-bold text-green-700 dark:text-green-300">
                   {(() => {
                     const originalPrice = parseFloat(formData.price.replace(/[^0-9.]/g, ''))
@@ -516,7 +516,7 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
                   })()}
                 </p>
                 <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                  Asl narx: {formData.price} - {formData.discountPercent}% = Chegirma narx
+                  Original Price: {formData.price} - {formData.discountPercent}% = Discounted Price
                 </p>
               </div>
             )}
@@ -524,8 +524,8 @@ function ServiceForm({ onSave, onCancel, initialData }: any) {
         </div>
         
         <div className="flex gap-2 mt-6">
-          <Button onClick={() => onSave(formData)}>Saqlash</Button>
-          <Button variant="outline" onClick={onCancel}>Bekor qilish</Button>
+          <Button onClick={() => onSave(formData)}>Save</Button>
+          <Button variant="outline" onClick={onCancel}>Cancel</Button>
         </div>
       </div>
     </Card>
@@ -552,11 +552,11 @@ function TestimonialsManagement() {
         console.log('Loaded testimonials:', result.data?.length || 0)
       } else {
         console.error('Failed to load testimonials:', result.message)
-        alert('Izohlarni yuklashda xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+        alert('Error loading testimonials: ' + (result.message || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error loading testimonials:', error)
-      alert('Izohlarni yuklashda xatolik yuz berdi. Iltimos, saytni yangilang.')
+      alert('Error loading testimonials. Please refresh the page.')
     }
   }
 
@@ -567,7 +567,7 @@ function TestimonialsManagement() {
   }
 
   const handleDelete = async (id: number) => {
-    if (confirm("Bu izohni o'chirishni xohlaysizmi?")) {
+    if (confirm("Are you sure you want to delete this testimonial?")) {
       try {
         const response = await fetch(`/api/testimonials?id=${id}`, {
           method: 'DELETE',
@@ -577,9 +577,9 @@ function TestimonialsManagement() {
           loadTestimonials()
           // Dispatch event to update frontend
           window.dispatchEvent(new Event("testimonialsUpdated"))
-          alert('Izoh muvaffaqiyatli o\'chirildi! Saytni yangilang (F5)')
+          alert('Testimonial deleted successfully! Please refresh the page (F5)')
         } else {
-          alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+          alert('Error: ' + (result.message || 'Unknown error'))
         }
       } catch (error) {
         console.error('Error deleting testimonial:', error)
@@ -592,14 +592,14 @@ function TestimonialsManagement() {
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">Izohlar Boshqaruvi</h2>
+          <h2 className="text-2xl font-bold">Testimonials Management</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Jami izohlar: {testimonials.length}
+            Total testimonials: {testimonials.length}
           </p>
         </div>
         <Button onClick={() => setIsAdding(true)} className="bg-primary hover:bg-primary/90">
           <Plus className="w-4 h-4 mr-2" />
-          Yangi Izoh
+          New Testimonial
         </Button>
       </div>
 
@@ -627,9 +627,9 @@ function TestimonialsManagement() {
                   setEditingId(null)
                   // Dispatch event to update frontend
                   window.dispatchEvent(new Event("testimonialsUpdated"))
-                  alert('Izoh muvaffaqiyatli yangilandi! Saytni yangilang (F5)')
+                  alert('Testimonial updated successfully! Please refresh the page (F5)')
                 } else {
-                  alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+                  alert('Error: ' + (result.message || 'Unknown error'))
                 }
               } else {
                 // Create new testimonial
@@ -649,9 +649,9 @@ function TestimonialsManagement() {
                   setIsAdding(false)
                   // Dispatch event to update frontend
                   window.dispatchEvent(new Event("testimonialsUpdated"))
-                  alert('Yangi izoh muvaffaqiyatli qo\'shildi! Saytni yangilang (F5)')
+                  alert('New testimonial added successfully! Please refresh the page (F5)')
                 } else {
-                  alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+                  alert('Error: ' + (result.message || 'Unknown error'))
                 }
               }
             } catch (error) {
@@ -668,8 +668,8 @@ function TestimonialsManagement() {
 
       {testimonials.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-lg mb-2">Hozircha izohlar yo'q</p>
-          <p className="text-sm">Yangi izoh qo'shish uchun "Yangi Izoh" tugmasini bosing</p>
+          <p className="text-lg mb-2">No testimonials yet</p>
+          <p className="text-sm">Click the "New Testimonial" button to add one</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -702,7 +702,7 @@ function TestimonialsManagement() {
                   </div>
                   <div className="bg-muted/50 p-3 rounded-lg mb-3">
                     <p className="text-sm text-foreground leading-relaxed line-clamp-4">
-                      {testimonial.text || "Izoh yo'q"}
+                      {testimonial.text || "No testimonial text"}
                     </p>
                   </div>
                 </div>
@@ -714,7 +714,7 @@ function TestimonialsManagement() {
                     className="flex-1"
                   >
                     <Edit className="w-4 h-4 mr-2" />
-                    Tahrirlash
+                    Edit
                   </Button>
                   <Button
                     variant="destructive"
@@ -723,7 +723,7 @@ function TestimonialsManagement() {
                     className="flex-1"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    O'chirish
+                    Delete
                   </Button>
                 </div>
               </div>
@@ -745,32 +745,32 @@ function TestimonialForm({ onSave, onCancel, initialData }: any) {
 
   return (
     <Card className="p-6 mb-6">
-      <h3 className="text-xl font-bold mb-4">{initialData ? "Izohni Tahrirlash" : "Yangi Izoh"}</h3>
+      <h3 className="text-xl font-bold mb-4">{initialData ? "Edit Testimonial" : "New Testimonial"}</h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Ism *</label>
+          <label className="block text-sm font-medium mb-2">Name *</label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            placeholder="Ism kiriting"
+            placeholder="Enter name"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Lavozim *</label>
+          <label className="block text-sm font-medium mb-2">Role/Position *</label>
           <input
             type="text"
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
-            placeholder="Lavozim kiriting"
+            placeholder="Enter role/position"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Izoh (Inglizcha) *</label>
+          <label className="block text-sm font-medium mb-2">Testimonial Text (English) *</label>
           <textarea
             value={formData.text}
             onChange={(e) => setFormData({ ...formData, text: e.target.value })}
@@ -781,25 +781,25 @@ function TestimonialForm({ onSave, onCancel, initialData }: any) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Reyting (1-5) *</label>
+          <label className="block text-sm font-medium mb-2">Rating (1-5) *</label>
           <select
             value={formData.rating}
             onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
             className="w-full px-4 py-2 border rounded-lg bg-background text-foreground"
           >
-            <option value={1}>1 yulduz</option>
-            <option value={2}>2 yulduz</option>
-            <option value={3}>3 yulduz</option>
-            <option value={4}>4 yulduz</option>
-            <option value={5}>5 yulduz</option>
+            <option value={1}>1 star</option>
+            <option value={2}>2 stars</option>
+            <option value={3}>3 stars</option>
+            <option value={4}>4 stars</option>
+            <option value={5}>5 stars</option>
           </select>
         </div>
         <div className="flex gap-2 pt-2">
           <Button onClick={() => onSave(formData)} className="bg-primary hover:bg-primary/90">
-            Saqlash
+            Save
           </Button>
           <Button variant="outline" onClick={onCancel}>
-            Bekor qilish
+            Cancel
           </Button>
         </div>
       </div>
@@ -864,18 +864,18 @@ function ContentManagement() {
         setEditingId(null)
         // Dispatch event to update frontend
         window.dispatchEvent(new Event('contentUpdated'))
-        alert('Kontent muvaffaqiyatli yangilandi! Saytni yangilang (F5)')
+        alert('Content updated successfully! Please refresh the page (F5)')
       } else {
-        alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+        alert('Error: ' + (result.message || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error saving content:', error)
-      alert('Kontentni saqlashda xatolik yuz berdi')
+      alert('Error saving content')
     }
   }
 
   const handleDelete = async (id: number, contentKey: string) => {
-    if (!confirm(`"${contentKey}" kontentini o'chirishni xohlaysizmi?`)) {
+    if (!confirm(`Are you sure you want to delete the "${contentKey}" content?`)) {
       return
     }
     try {
@@ -887,13 +887,13 @@ function ContentManagement() {
         await loadContents()
         // Dispatch event to update frontend
         window.dispatchEvent(new Event('contentUpdated'))
-        alert('Kontent muvaffaqiyatli o\'chirildi! Saytni yangilang (F5)')
+        alert('Content deleted successfully! Please refresh the page (F5)')
       } else {
-        alert('Xatolik: ' + (result.message || 'Noma\'lum xatolik'))
+        alert('Error: ' + (result.message || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error deleting content:', error)
-      alert('Kontentni o\'chirishda xatolik yuz berdi')
+      alert('Error deleting content')
     }
   }
 
@@ -908,8 +908,8 @@ function ContentManagement() {
   if (loading) {
     return (
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Kontent Boshqaruvi</h2>
-        <p className="text-muted-foreground">Yuklanmoqda...</p>
+        <h2 className="text-2xl font-bold mb-6">Content Management</h2>
+        <p className="text-muted-foreground">Loading...</p>
       </Card>
     )
   }
@@ -917,7 +917,7 @@ function ContentManagement() {
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Kontent Boshqaruvi</h2>
+        <h2 className="text-2xl font-bold">Content Management</h2>
         <div className="flex gap-2">
           <select
             value={selectedPage}
@@ -926,12 +926,12 @@ function ContentManagement() {
           >
             {pages.map(page => (
               <option key={page} value={page}>
-                {page === 'all' ? 'Barcha sahifalar' : page.charAt(0).toUpperCase() + page.slice(1)}
+                {page === 'all' ? 'All Pages' : page.charAt(0).toUpperCase() + page.slice(1)}
               </option>
             ))}
           </select>
           <Button onClick={loadContents} variant="outline">
-            Yangilash
+            Refresh
           </Button>
         </div>
       </div>
@@ -940,7 +940,7 @@ function ContentManagement() {
         {Object.entries(groupedContents).map(([page, pageContents]) => (
           <div key={page} className="border rounded-lg p-4">
             <h3 className="text-xl font-semibold mb-4 capitalize">
-              {page === 'all' ? 'Barcha' : page} sahifasi ({pageContents.length} ta matn)
+              {page === 'all' ? 'All' : page.charAt(0).toUpperCase() + page.slice(1)} Page ({pageContents.length} items)
             </h3>
             <div className="space-y-3">
               {pageContents.map((content) => (
@@ -966,7 +966,7 @@ function ContentManagement() {
                             size="sm"
                             onClick={() => handleSave(content.id, content.content_value)}
                           >
-                            Saqlash
+                            Save
                           </Button>
                           <Button
                             size="sm"
@@ -976,14 +976,14 @@ function ContentManagement() {
                               loadContents() // Reset to original
                             }}
                           >
-                            Bekor qilish
+                            Cancel
                           </Button>
                         </div>
                       </div>
                     ) : (
                       <div>
                         <p className="text-sm text-foreground whitespace-pre-wrap break-words">
-                          {content.content_value || '(bo\'sh)'}
+                          {content.content_value || '(empty)'}
                         </p>
                         <div className="flex gap-2 mt-2">
                           <Button
@@ -992,7 +992,7 @@ function ContentManagement() {
                             onClick={() => setEditingId(content.id)}
                           >
                             <Edit className="w-3 h-3 mr-1" />
-                            Tahrirlash
+                            Edit
                           </Button>
                           <Button
                             variant="destructive"
@@ -1000,7 +1000,7 @@ function ContentManagement() {
                             onClick={() => handleDelete(content.id, content.content_key)}
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
-                            O'chirish
+                            Delete
                           </Button>
                         </div>
                       </div>
@@ -1013,7 +1013,7 @@ function ContentManagement() {
         ))}
         {contents.length === 0 && (
           <p className="text-muted-foreground text-center py-8">
-            Kontent topilmadi. Database'ni yangilash uchun /api/init-db endpoint'ni chaqiring.
+            No content found. Call /api/init-db endpoint to initialize the database.
           </p>
         )}
       </div>
@@ -1063,13 +1063,13 @@ function SettingsManagement() {
         window.dispatchEvent(new CustomEvent('settingsUpdated', { detail: { snowEnabled } }))
         // Also set localStorage for cross-tab updates
         localStorage.setItem('settingsUpdated', JSON.stringify({ snowEnabled, timestamp: Date.now() }))
-        alert('Sozlamalar muvaffaqiyatli saqlandi! Sayt avtomatik yangilanadi.')
+        alert('Settings saved successfully! The website will update automatically.')
       } else {
-        alert('Xatolik: ' + (result.error || 'Noma\'lum xatolik'))
+        alert('Error: ' + (result.error || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error saving settings:', error)
-      alert('Sozlamalarni saqlashda xatolik yuz berdi')
+      alert('Error saving settings')
     } finally {
       setSaving(false)
     }
@@ -1078,8 +1078,8 @@ function SettingsManagement() {
   if (loading) {
     return (
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Sozlamalar</h2>
-        <p className="text-muted-foreground">Yuklanmoqda...</p>
+        <h2 className="text-2xl font-bold mb-6">Settings</h2>
+        <p className="text-muted-foreground">Loading...</p>
       </Card>
     )
   }
@@ -1088,13 +1088,13 @@ function SettingsManagement() {
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">Sozlamalar</h2>
+          <h2 className="text-2xl font-bold">Settings</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Sayt sozlamalarini boshqaring
+            Manage website settings
           </p>
         </div>
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+          {saving ? 'Saving...' : 'Save'}
         </Button>
       </div>
 
@@ -1103,9 +1103,9 @@ function SettingsManagement() {
         <div className="bg-muted/50 p-4 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="font-semibold mb-1 text-foreground">Qor Yog'ish Effekti</h3>
+              <h3 className="font-semibold mb-1 text-foreground">Snow Effect</h3>
               <p className="text-sm text-muted-foreground">
-                Saytda qor yog'ish animatsiyasini yoqish yoki o'chirish
+                Enable or disable the snow animation on the website
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer ml-4">
@@ -1119,7 +1119,7 @@ function SettingsManagement() {
             </label>
           </div>
           <div className="mt-2 text-xs text-muted-foreground">
-            {snowEnabled ? '✅ Qor yog\'ish effekti yoqilgan' : '❌ Qor yog\'ish effekti o\'chirilgan'}
+            {snowEnabled ? '✅ Snow effect enabled' : '❌ Snow effect disabled'}
           </div>
         </div>
       </div>
@@ -1149,7 +1149,7 @@ function FAQManagement() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Bu FAQ\'ni o\'chirishni xohlaysizmi?')) return
+    if (!confirm('Are you sure you want to delete this FAQ?')) return
 
     try {
       const response = await fetch(`/api/faq?id=${id}`, {
@@ -1159,11 +1159,11 @@ function FAQManagement() {
       if (result.success) {
         loadFAQs()
         window.dispatchEvent(new Event('faqUpdated'))
-        alert('FAQ muvaffaqiyatli o\'chirildi!')
+        alert('FAQ deleted successfully!')
       }
     } catch (error) {
       console.error('Error deleting FAQ:', error)
-      alert('FAQ\'ni o\'chirishda xatolik yuz berdi')
+      alert('Error deleting FAQ')
     }
   }
 
@@ -1188,24 +1188,24 @@ function FAQManagement() {
         setIsAdding(false)
         setEditingId(null)
         window.dispatchEvent(new Event('faqUpdated'))
-        alert(`FAQ muvaffaqiyatli ${editingId ? 'yangilandi' : 'qo\'shildi'}!`)
+        alert(`FAQ ${editingId ? 'updated' : 'added'} successfully!`)
       } else {
-        alert('Xatolik: ' + (result.error || 'Noma\'lum xatolik'))
+        alert('Error: ' + (result.error || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error saving FAQ:', error)
-      alert('FAQ\'ni saqlashda xatolik yuz berdi')
+      alert('Error saving FAQ')
     }
   }
 
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">FAQ Boshqaruvi</h2>
+        <h2 className="text-2xl font-bold">FAQ Management</h2>
         {!isAdding && !editingId && (
           <Button onClick={() => setIsAdding(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Yangi FAQ qo'shish
+            Add New FAQ
           </Button>
         )}
       </div>
@@ -1237,7 +1237,7 @@ function FAQManagement() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-1">{faq.question}</h3>
                     <p className="text-muted-foreground text-sm">{faq.answer}</p>
-                    <p className="text-xs text-muted-foreground mt-2">Tartib: {faq.display_order}</p>
+                    <p className="text-xs text-muted-foreground mt-2">Order: {faq.display_order}</p>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button
@@ -1285,26 +1285,26 @@ function FAQForm({ faq, onSave, onCancel }: { faq: any; onSave: (data: any) => v
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-2">Savol</label>
+        <label className="block text-sm font-medium mb-2">Question</label>
         <input
           type="text"
           value={formData.question}
           onChange={(e) => setFormData({ ...formData, question: e.target.value })}
           className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
-          placeholder="FAQ savolini kiriting"
+          placeholder="Enter FAQ question"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-2">Javob</label>
+        <label className="block text-sm font-medium mb-2">Answer</label>
         <textarea
           value={formData.answer}
           onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
           className="w-full px-3 py-2 border rounded-lg bg-background text-foreground min-h-[100px]"
-          placeholder="FAQ javobini kiriting"
+          placeholder="Enter FAQ answer"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-2">Ko'rinish tartibi (Display Order)</label>
+        <label className="block text-sm font-medium mb-2">Display Order</label>
         <input
           type="number"
           value={formData.display_order}
@@ -1318,10 +1318,10 @@ function FAQForm({ faq, onSave, onCancel }: { faq: any; onSave: (data: any) => v
           onClick={() => onSave(formData)}
           disabled={!formData.question.trim() || !formData.answer.trim()}
         >
-          Saqlash
+          Save
         </Button>
         <Button variant="outline" onClick={onCancel}>
-          Bekor qilish
+          Cancel
         </Button>
       </div>
     </div>
@@ -1391,13 +1391,13 @@ function TimezoneManagement() {
       if (result.success) {
         window.dispatchEvent(new CustomEvent('timezoneUpdated', { detail: { timezone } }))
         localStorage.setItem('timezoneUpdated', JSON.stringify({ timezone, timestamp: Date.now() }))
-        alert('Vaqt sozlamasi muvaffaqiyatli saqlandi! Sayt avtomatik yangilanadi.')
+        alert('Timezone setting saved successfully! The website will update automatically.')
       } else {
-        alert('Xatolik: ' + (result.error || 'Noma\'lum xatolik'))
+        alert('Error: ' + (result.error || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error saving timezone:', error)
-      alert('Vaqt sozlamasini saqlashda xatolik yuz berdi')
+      alert('Error saving timezone setting')
     } finally {
       setSaving(false)
     }
@@ -1406,8 +1406,8 @@ function TimezoneManagement() {
   if (loading) {
     return (
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Vaqt Sozlamalari</h2>
-        <p className="text-muted-foreground">Yuklanmoqda...</p>
+        <h2 className="text-2xl font-bold mb-6">Timezone Settings</h2>
+        <p className="text-muted-foreground">Loading...</p>
       </Card>
     )
   }
@@ -1416,20 +1416,20 @@ function TimezoneManagement() {
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">Vaqt Sozlamalari</h2>
+          <h2 className="text-2xl font-bold">Timezone Settings</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Saytda ko'rsatiladigan vaqt mintaqasini tanlang
+            Select the timezone to display on the website
           </p>
         </div>
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+          {saving ? 'Saving...' : 'Save'}
         </Button>
       </div>
 
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2 text-foreground">
-            Vaqt Mintaqasi (Timezone)
+            Timezone
           </label>
           <select
             value={timezone}
@@ -1443,12 +1443,12 @@ function TimezoneManagement() {
             ))}
           </select>
           <p className="text-xs text-muted-foreground mt-2">
-            Tanlangan vaqt mintaqasi footer va services sahifasidagi soat widget'ida ko'rsatiladi.
+            The selected timezone will be displayed in the clock widget on the footer and services page.
           </p>
         </div>
 
         <div className="bg-muted/50 p-4 rounded-lg">
-          <h3 className="font-semibold mb-2 text-foreground">Hozirgi vaqt (ko'rsatiladigan):</h3>
+          <h3 className="font-semibold mb-2 text-foreground">Current Time (will be displayed):</h3>
           <TimezonePreview timezone={timezone} />
         </div>
       </div>
