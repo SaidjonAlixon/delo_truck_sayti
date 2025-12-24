@@ -92,10 +92,13 @@ export default function AdminPanel() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="services">Xizmatlar</TabsTrigger>
             <TabsTrigger value="testimonials">Izohlar</TabsTrigger>
             <TabsTrigger value="content">Kontent</TabsTrigger>
+            <TabsTrigger value="faq">FAQ</TabsTrigger>
+            <TabsTrigger value="timezone">Vaqt</TabsTrigger>
+            <TabsTrigger value="settings">Sozlamalar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services">
@@ -108,6 +111,18 @@ export default function AdminPanel() {
 
           <TabsContent value="content">
             <ContentManagement />
+          </TabsContent>
+
+          <TabsContent value="faq">
+            <FAQManagement />
+          </TabsContent>
+
+          <TabsContent value="timezone">
+            <TimezoneManagement />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SettingsManagement />
           </TabsContent>
         </Tabs>
       </div>
@@ -1006,4 +1021,498 @@ function ContentManagement() {
   )
 }
 
+function SettingsManagement() {
+  const [snowEnabled, setSnowEnabled] = useState<boolean>(true)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    loadSettings()
+  }, [])
+
+  const loadSettings = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/settings?key=snow_enabled')
+      const result = await response.json()
+      if (result.success && result.data) {
+        setSnowEnabled(result.data.setting_value === 'true')
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: 'snow_enabled',
+          value: snowEnabled.toString(),
+        }),
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        // Dispatch event to update frontend
+        window.dispatchEvent(new CustomEvent('settingsUpdated', { detail: { snowEnabled } }))
+        // Also set localStorage for cross-tab updates
+        localStorage.setItem('settingsUpdated', JSON.stringify({ snowEnabled, timestamp: Date.now() }))
+        alert('Sozlamalar muvaffaqiyatli saqlandi! Sayt avtomatik yangilanadi.')
+      } else {
+        alert('Xatolik: ' + (result.error || 'Noma\'lum xatolik'))
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      alert('Sozlamalarni saqlashda xatolik yuz berdi')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Sozlamalar</h2>
+        <p className="text-muted-foreground">Yuklanmoqda...</p>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Sozlamalar</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Sayt sozlamalarini boshqaring
+          </p>
+        </div>
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+        </Button>
+      </div>
+
+      <div className="space-y-6">
+        {/* Snow Effect Setting */}
+        <div className="bg-muted/50 p-4 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="font-semibold mb-1 text-foreground">Qor Yog'ish Effekti</h3>
+              <p className="text-sm text-muted-foreground">
+                Saytda qor yog'ish animatsiyasini yoqish yoki o'chirish
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer ml-4">
+              <input
+                type="checkbox"
+                checked={snowEnabled}
+                onChange={(e) => setSnowEnabled(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            {snowEnabled ? '✅ Qor yog\'ish effekti yoqilgan' : '❌ Qor yog\'ish effekti o\'chirilgan'}
+          </div>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+function FAQManagement() {
+  const [faqs, setFAQs] = useState<any[]>([])
+  const [isAdding, setIsAdding] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+
+  useEffect(() => {
+    loadFAQs()
+  }, [])
+
+  const loadFAQs = async () => {
+    try {
+      const response = await fetch('/api/faq')
+      const result = await response.json()
+      if (result.success) {
+        setFAQs(result.data.sort((a: any, b: any) => a.display_order - b.display_order))
+      }
+    } catch (error) {
+      console.error('Error loading FAQs:', error)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Bu FAQ\'ni o\'chirishni xohlaysizmi?')) return
+
+    try {
+      const response = await fetch(`/api/faq?id=${id}`, {
+        method: 'DELETE',
+      })
+      const result = await response.json()
+      if (result.success) {
+        loadFAQs()
+        window.dispatchEvent(new Event('faqUpdated'))
+        alert('FAQ muvaffaqiyatli o\'chirildi!')
+      }
+    } catch (error) {
+      console.error('Error deleting FAQ:', error)
+      alert('FAQ\'ni o\'chirishda xatolik yuz berdi')
+    }
+  }
+
+  const handleSave = async (faqData: { question: string; answer: string; display_order: number }) => {
+    try {
+      const method = editingId ? 'PUT' : 'POST'
+      const url = '/api/faq'
+      
+      const requestBody = editingId 
+        ? { ...faqData, id: editingId }
+        : faqData
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        loadFAQs()
+        setIsAdding(false)
+        setEditingId(null)
+        window.dispatchEvent(new Event('faqUpdated'))
+        alert(`FAQ muvaffaqiyatli ${editingId ? 'yangilandi' : 'qo\'shildi'}!`)
+      } else {
+        alert('Xatolik: ' + (result.error || 'Noma\'lum xatolik'))
+      }
+    } catch (error) {
+      console.error('Error saving FAQ:', error)
+      alert('FAQ\'ni saqlashda xatolik yuz berdi')
+    }
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">FAQ Boshqaruvi</h2>
+        {!isAdding && !editingId && (
+          <Button onClick={() => setIsAdding(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Yangi FAQ qo'shish
+          </Button>
+        )}
+      </div>
+
+      {isAdding && !editingId && (
+        <FAQForm
+          faq={null}
+          onSave={(data) => {
+            handleSave(data)
+          }}
+          onCancel={() => setIsAdding(false)}
+        />
+      )}
+
+      <div className="space-y-4">
+        {faqs.map((faq) => (
+          <div key={faq.id} className="border rounded-lg p-4">
+            {editingId === faq.id ? (
+              <FAQForm
+                faq={faq}
+                onSave={(data) => {
+                  handleSave(data)
+                }}
+                onCancel={() => setEditingId(null)}
+              />
+            ) : (
+              <>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1">{faq.question}</h3>
+                    <p className="text-muted-foreground text-sm">{faq.answer}</p>
+                    <p className="text-xs text-muted-foreground mt-2">Tartib: {faq.display_order}</p>
+                  </div>
+                  <div className="flex gap-2 ml-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingId(faq.id)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(faq.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
+function FAQForm({ faq, onSave, onCancel }: { faq: any; onSave: (data: any) => void; onCancel: () => void }) {
+  const [formData, setFormData] = useState({
+    question: faq?.question || '',
+    answer: faq?.answer || '',
+    display_order: faq?.display_order || 0,
+  })
+
+  useEffect(() => {
+    if (faq) {
+      setFormData({
+        question: faq.question || '',
+        answer: faq.answer || '',
+        display_order: faq.display_order || 0,
+      })
+    }
+  }, [faq])
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-2">Savol</label>
+        <input
+          type="text"
+          value={formData.question}
+          onChange={(e) => setFormData({ ...formData, question: e.target.value })}
+          className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
+          placeholder="FAQ savolini kiriting"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Javob</label>
+        <textarea
+          value={formData.answer}
+          onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
+          className="w-full px-3 py-2 border rounded-lg bg-background text-foreground min-h-[100px]"
+          placeholder="FAQ javobini kiriting"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Ko'rinish tartibi (Display Order)</label>
+        <input
+          type="number"
+          value={formData.display_order}
+          onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+          className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
+          placeholder="0"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button
+          onClick={() => onSave(formData)}
+          disabled={!formData.question.trim() || !formData.answer.trim()}
+        >
+          Saqlash
+        </Button>
+        <Button variant="outline" onClick={onCancel}>
+          Bekor qilish
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function TimezoneManagement() {
+  const [timezone, setTimezone] = useState<string>('America/New_York')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  const timezones = [
+    { value: 'America/New_York', label: 'Eastern Time (ET) - New York, USA' },
+    { value: 'America/Chicago', label: 'Central Time (CT) - Chicago, USA' },
+    { value: 'America/Denver', label: 'Mountain Time (MT) - Denver, USA' },
+    { value: 'America/Los_Angeles', label: 'Pacific Time (PT) - Los Angeles, USA' },
+    { value: 'America/Phoenix', label: 'Mountain Standard Time (MST) - Phoenix, USA' },
+    { value: 'America/Anchorage', label: 'Alaska Time (AKT) - Anchorage, USA' },
+    { value: 'Pacific/Honolulu', label: 'Hawaii Time (HST) - Honolulu, USA' },
+    { value: 'Europe/London', label: 'Greenwich Mean Time (GMT) - London, UK' },
+    { value: 'Europe/Paris', label: 'Central European Time (CET) - Paris, France' },
+    { value: 'Europe/Berlin', label: 'Central European Time (CET) - Berlin, Germany' },
+    { value: 'Asia/Dubai', label: 'Gulf Standard Time (GST) - Dubai, UAE' },
+    { value: 'Asia/Tashkent', label: 'Uzbekistan Time (UZT) - Tashkent, Uzbekistan' },
+    { value: 'Asia/Tokyo', label: 'Japan Standard Time (JST) - Tokyo, Japan' },
+    { value: 'Asia/Shanghai', label: 'China Standard Time (CST) - Shanghai, China' },
+    { value: 'Asia/Kolkata', label: 'India Standard Time (IST) - Mumbai, India' },
+    { value: 'Australia/Sydney', label: 'Australian Eastern Time (AET) - Sydney, Australia' },
+    { value: 'America/Mexico_City', label: 'Central Time (CT) - Mexico City, Mexico' },
+    { value: 'America/Sao_Paulo', label: 'Brasília Time (BRT) - São Paulo, Brazil' },
+    { value: 'America/Toronto', label: 'Eastern Time (ET) - Toronto, Canada' },
+    { value: 'America/Vancouver', label: 'Pacific Time (PT) - Vancouver, Canada' },
+  ]
+
+  useEffect(() => {
+    loadTimezone()
+  }, [])
+
+  const loadTimezone = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/settings?key=timezone')
+      const result = await response.json()
+      if (result.success && result.data) {
+        setTimezone(result.data.setting_value)
+      }
+    } catch (error) {
+      console.error('Error loading timezone:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: 'timezone',
+          value: timezone,
+        }),
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        window.dispatchEvent(new CustomEvent('timezoneUpdated', { detail: { timezone } }))
+        localStorage.setItem('timezoneUpdated', JSON.stringify({ timezone, timestamp: Date.now() }))
+        alert('Vaqt sozlamasi muvaffaqiyatli saqlandi! Sayt avtomatik yangilanadi.')
+      } else {
+        alert('Xatolik: ' + (result.error || 'Noma\'lum xatolik'))
+      }
+    } catch (error) {
+      console.error('Error saving timezone:', error)
+      alert('Vaqt sozlamasini saqlashda xatolik yuz berdi')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Vaqt Sozlamalari</h2>
+        <p className="text-muted-foreground">Yuklanmoqda...</p>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Vaqt Sozlamalari</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Saytda ko'rsatiladigan vaqt mintaqasini tanlang
+          </p>
+        </div>
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+        </Button>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-2 text-foreground">
+            Vaqt Mintaqasi (Timezone)
+          </label>
+          <select
+            value={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg bg-background text-foreground min-h-[44px]"
+          >
+            {timezones.map((tz) => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground mt-2">
+            Tanlangan vaqt mintaqasi footer va services sahifasidagi soat widget'ida ko'rsatiladi.
+          </p>
+        </div>
+
+        <div className="bg-muted/50 p-4 rounded-lg">
+          <h3 className="font-semibold mb-2 text-foreground">Hozirgi vaqt (ko'rsatiladigan):</h3>
+          <TimezonePreview timezone={timezone} />
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+function TimezonePreview({ timezone }: { timezone: string }) {
+  const [currentTime, setCurrentTime] = useState<{
+    time: string
+    date: string
+    timezoneLabel: string
+  }>({
+    time: '',
+    date: '',
+    timezoneLabel: '',
+  })
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date()
+      
+      const timeString = now.toLocaleString('en-US', {
+        timeZone: timezone,
+        hour12: true,
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+      })
+
+      const dateString = now.toLocaleString('en-US', {
+        timeZone: timezone,
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        weekday: 'long',
+      })
+
+      const timeZoneName = now.toLocaleString('en-US', {
+        timeZone: timezone,
+        timeZoneName: 'short',
+      })
+
+      const timezoneLabel = timeZoneName.split(' ').pop() || timezone
+
+      setCurrentTime({
+        time: timeString,
+        date: dateString,
+        timezoneLabel: timezoneLabel,
+      })
+    }
+
+    updateTime()
+    const interval = setInterval(updateTime, 1000)
+
+    return () => clearInterval(interval)
+  }, [timezone])
+
+  return (
+    <div className="space-y-1">
+      <p className="text-2xl font-bold text-foreground font-mono">{currentTime.time}</p>
+      <p className="text-sm text-muted-foreground">{currentTime.date}</p>
+      <p className="text-xs text-muted-foreground">({currentTime.timezoneLabel})</p>
+    </div>
+  )
+}
 

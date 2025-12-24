@@ -71,6 +71,36 @@ export async function initDatabase() {
       )
     `)
 
+    // Create FAQ table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS faq (
+        id SERIAL PRIMARY KEY,
+        question TEXT NOT NULL,
+        answer TEXT NOT NULL,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+    // Create settings table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS settings (
+        id SERIAL PRIMARY KEY,
+        setting_key VARCHAR(255) UNIQUE NOT NULL,
+        setting_value TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+    // Insert default settings if not exists
+    await pool.query(`
+      INSERT INTO settings (setting_key, setting_value)
+      VALUES ('timezone', 'America/New_York'), ('snow_enabled', 'true')
+      ON CONFLICT (setting_key) DO NOTHING
+    `)
+
     // Create admin credentials table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS admin_credentials (
@@ -147,6 +177,31 @@ export async function initDatabase() {
            VALUES ($1, $2, $3, $4, $5, $6)
            ON CONFLICT (service_id) DO NOTHING`,
           [service.service_id, service.title_key, service.desc_key, service.price, service.price_type, service.image]
+        )
+      }
+    }
+
+    // Check if FAQ table is empty, then insert default FAQs
+    const faqCount = await pool.query('SELECT COUNT(*) FROM faq')
+    if (parseInt(faqCount.rows[0].count) === 0) {
+      const defaultFAQs = [
+        { question: 'What types of commercial vehicles do you service?', answer: 'We service all types of commercial vehicles including semi-trucks, delivery trucks, box trucks, refrigerated trucks, dump trucks, and other heavy-duty commercial vehicles. Our certified technicians are experienced in working with various makes and models across the commercial trucking industry.', display_order: 1 },
+        { question: 'Do you offer emergency roadside assistance?', answer: 'Yes, we provide 24/7 emergency roadside assistance services. Our mobile service trucks can come to your location to handle breakdowns, tire changes, jump starts, and other urgent repairs. We understand that downtime costs money, so we\'re committed to getting you back on the road as quickly as possible.', display_order: 2 },
+        { question: 'How long have you been in business?', answer: 'Delo Truck Center LLC has been serving the commercial trucking industry for over 5 years. In that time, we\'ve built a reputation for quality service, reliability, and customer satisfaction. Our experience and expertise make us a trusted partner for fleet operators and individual truck owners.', display_order: 3 },
+        { question: 'Do you provide DOT inspections?', answer: 'Yes, we are certified to perform DOT inspections and CARB inspections. Our comprehensive inspection services ensure your vehicles meet all federal and state regulatory requirements. We can help you maintain compliance and avoid costly violations.', display_order: 4 },
+        { question: 'What payment methods do you accept?', answer: 'We accept cash, major credit cards, debit cards, and offer net terms for qualified fleet accounts. We can also work with various fleet management companies and insurance providers. Please contact us to discuss payment options that work best for your business needs.', display_order: 5 },
+        { question: 'Do you offer fleet maintenance programs?', answer: 'Yes, we offer customized fleet maintenance programs designed to minimize downtime and extend the life of your vehicles. Our programs include scheduled maintenance, priority service scheduling, detailed maintenance records, and cost-effective pricing. Contact us to discuss a maintenance plan tailored to your fleet\'s specific needs.', display_order: 6 },
+        { question: 'Are your technicians certified?', answer: 'Absolutely. Our team consists of ASE-certified mechanics with extensive training and experience in commercial vehicle repair. We invest in continuous education and training to ensure our technicians stay current with the latest technologies and repair techniques in the industry.', display_order: 7 },
+        { question: 'How quickly can you complete repairs?', answer: 'Repair times vary depending on the nature and complexity of the work needed. We provide detailed estimates that include projected completion times before starting any work. For emergency repairs, we prioritize getting your vehicle back on the road quickly. Our efficient processes and well-equipped facility help us minimize turnaround times without compromising quality.', display_order: 8 },
+        { question: 'Do you use OEM (Original Equipment Manufacturer) parts?', answer: 'We use premium quality parts that meet or exceed OEM specifications. While we can source OEM parts when requested, we also work with trusted aftermarket suppliers that provide high-quality alternatives at competitive prices. We always discuss parts options with you before making any replacements to ensure you\'re comfortable with the choices.', display_order: 9 },
+        { question: 'Can I get a quote before scheduling service?', answer: 'Yes, we provide free estimates for all repair and maintenance services. You can call us, visit our facility, or request a quote through our website. We\'ll inspect your vehicle, explain what needs to be done, and provide a detailed estimate before any work begins. There are no hidden fees - you\'ll know exactly what to expect.', display_order: 10 },
+      ]
+      
+      for (const faq of defaultFAQs) {
+        await pool.query(
+          `INSERT INTO faq (question, answer, display_order)
+           VALUES ($1, $2, $3)`,
+          [faq.question, faq.answer, faq.display_order]
         )
       }
     }

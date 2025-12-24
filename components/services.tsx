@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Search, Circle, Droplet, Gauge, SettingsIcon, ClipboardCheck, Truck, Wind, Disc, CheckCircle, FileCheck, FlaskConical, Sparkles, Battery } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -227,6 +227,30 @@ export function Services() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedService, setSelectedService] = useState("")
   const [services, setServices] = useState(defaultServices)
+  const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({})
+  const observerRef = useRef<IntersectionObserver | null>(null)
+
+  useEffect(() => {
+    // Set up intersection observer for animations
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }))
+          }
+        })
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    )
+
+    const elements = document.querySelectorAll("[data-service-animate]")
+    elements.forEach((el) => observerRef.current?.observe(el))
+
+    return () => {
+      elements.forEach((el) => observerRef.current?.unobserve(el))
+      observerRef.current?.disconnect()
+    }
+  }, [services])
 
   useEffect(() => {
     loadServices()
@@ -306,7 +330,7 @@ export function Services() {
           discountPercent: s.discount_percent,
           saleStartDate: s.sale_start_date,
           saleEndDate: s.sale_end_date,
-        }))
+          }))
         setServices(transformed)
       } else {
         // Fallback to default services if database is empty
@@ -328,10 +352,10 @@ export function Services() {
     <section id="services" className="py-20 bg-muted/30 w-full">
       <div className="container mx-auto px-6 w-full max-w-full">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
+          <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4 animate-pulse">
             <span className="text-sm font-semibold text-primary">{getContent("ourServices")}</span>
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-balance text-foreground">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-balance text-foreground bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
             {getContent("comprehensiveTruckServices")}
           </h2>
           <p className="text-lg text-foreground leading-relaxed">{getContent("servicesDescription")}</p>
@@ -363,8 +387,14 @@ export function Services() {
             return (
               <Card
                 key={index}
-                id={`service-${service.serviceId}`}
-                className="relative p-8 hover:shadow-xl transition-all bg-card border-border overflow-hidden group min-h-[450px] w-full h-full"
+                id={`service-${service.serviceId}-${index}`}
+                data-service-animate
+                className={`relative p-8 hover:shadow-2xl transition-all duration-500 bg-card border-border overflow-hidden group min-h-[450px] w-full h-full hover:scale-105 hover:-translate-y-2 ${
+                  isVisible[`service-${service.serviceId}-${index}`] 
+                    ? "opacity-100 translate-y-0" 
+                    : "opacity-0 translate-y-10"
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
                 {/* Sale Badge - Top Right */}
                 {isSaleActive && (
@@ -389,11 +419,11 @@ export function Services() {
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-300" />
 
                 {/* Service Title - Visible until hover */}
-                <div className="relative z-10 flex flex-col items-center justify-center h-full opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+                <div className="relative z-10 flex flex-col items-center justify-center h-full opacity-100 group-hover:opacity-0 transition-all duration-500 transform group-hover:scale-110">
                   {/* Discounted Price on Top */}
                   {isSaleActive && discountedPrice && (
-                    <div className="mb-4 text-center">
-                      <div className="bg-red-600/90 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-red-400 shadow-lg">
+                    <div className="mb-4 text-center animate-bounce">
+                      <div className="bg-red-600/90 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-red-400 shadow-lg transform hover:scale-105 transition-transform">
                         <p className="text-xs text-white/90 mb-1">Sale Price</p>
                         <p className="text-3xl font-bold text-white">{discountedPrice}</p>
                       </div>
@@ -402,18 +432,23 @@ export function Services() {
                       </div>
                     </div>
                   )}
+                  <div className="mb-4 transform group-hover:rotate-6 transition-transform duration-300">
+                    <div className="w-20 h-20 bg-primary/20 backdrop-blur-md rounded-2xl flex items-center justify-center border-2 border-primary/50 shadow-lg">
+                      <Icon className="w-10 h-10 text-primary drop-shadow-lg" />
+                    </div>
+                  </div>
                   <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-center">
                     {service.title || getContent(service.titleKey)}
                   </h3>
                 </div>
 
                 {/* Full Content - Hidden until hover */}
-                <div className="absolute inset-0 flex flex-col justify-between p-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                <div className="absolute inset-0 flex flex-col justify-between p-8 opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-100 scale-95 z-10">
                   <div>
-                    <div className="w-16 h-16 bg-primary/40 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border-2 border-primary/70 shadow-lg">
+                    <div className="w-16 h-16 bg-primary/40 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border-2 border-primary/70 shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
                       <Icon className="w-8 h-8 text-primary drop-shadow-lg" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-3 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                    <h3 className="text-2xl font-bold mb-3 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] transform group-hover:translate-x-2 transition-transform">
                       {service.title || getContent(service.titleKey)}
                     </h3>
                     <p className="text-white leading-relaxed mb-6 min-h-[72px] drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
@@ -433,11 +468,11 @@ export function Services() {
                     )}
                     
                     <div className="flex items-center justify-between">
-                      <div className="bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-primary/50">
-                        {service.priceType === "call" ? (
+                    <div className="bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-primary/50">
+                      {service.priceType === "call" ? (
                           <p className="text-xl font-bold text-blue-400 drop-shadow-lg">{getContent("callForPrice")}</p>
-                        ) : (
-                          <div>
+                      ) : (
+                        <div>
                             {isSaleActive && discountedPrice ? (
                               <>
                                 <p className="text-xs text-white/70 line-through mb-1">{service.price}</p>
@@ -451,23 +486,23 @@ export function Services() {
                               </>
                             ) : (
                               <>
-                                {service.priceType === "starting" && (
+                          {service.priceType === "starting" && (
                                   <p className="text-sm text-white/90 mb-1 font-medium drop-shadow-md">{getContent("startingAt")}</p>
-                                )}
-                                <p className="text-2xl font-bold text-blue-400 drop-shadow-lg">{service.price}</p>
+                          )}
+                          <p className="text-2xl font-bold text-blue-400 drop-shadow-lg">{service.price}</p>
                               </>
                             )}
-                          </div>
-                        )}
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="lg"
-                        className="bg-red-700 hover:bg-red-800 text-white font-bold border-2 border-white/30 shadow-lg hover:shadow-xl transition-all"
-                        onClick={() => handleGetQuote(service.serviceId)}
-                      >
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="lg"
+                      className="bg-red-700 hover:bg-red-800 text-white font-bold border-2 border-white/30 shadow-lg hover:shadow-xl transition-all"
+                      onClick={() => handleGetQuote(service.serviceId)}
+                    >
                         {getContent("getAQuote")}
-                      </Button>
+                    </Button>
                     </div>
                   </div>
                 </div>
