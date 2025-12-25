@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 // Helper function to get city/country name from timezone
 function getTimezoneLocation(timezone: string): string {
   const timezoneMap: { [key: string]: string } = {
-    'America/New_York': 'New York, USA',
+    'America/New_York': 'Dayton, OH',
     'America/Chicago': 'Chicago, USA',
     'America/Denver': 'Denver, USA',
     'America/Los_Angeles': 'Los Angeles, USA',

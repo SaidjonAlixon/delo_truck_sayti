@@ -1719,7 +1719,7 @@ function TimezoneManagement() {
   const [saving, setSaving] = useState(false)
 
   const timezones = [
-    { value: 'America/New_York', label: 'Eastern Time (ET) - New York, USA' },
+    { value: 'America/New_York', label: 'Eastern Time (ET) - Dayton, OH' },
     { value: 'America/Chicago', label: 'Central Time (CT) - Chicago, USA' },
     { value: 'America/Denver', label: 'Mountain Time (MT) - Denver, USA' },
     { value: 'America/Los_Angeles', label: 'Pacific Time (PT) - Los Angeles, USA' },
